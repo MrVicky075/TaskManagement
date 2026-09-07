@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Detail · TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7fc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .card { background: #fff; padding: 1.5rem 2rem; min-height: 100vh; max-width: 960px; margin: 0 auto; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1.4rem; font-weight: 600; color: #0b1a33; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: #f7faff; color: #2a436e; border: 1px solid #ccd7e9; border-radius: 10px; text-decoration: none; font-size: 0.85rem; }
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .meta-item { background: #f8faff; border: 1px solid #e9edf4; border-radius: 10px; padding: 0.75rem 0.9rem; }
+        .meta-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5e6f8d; margin-bottom: 0.25rem; }
+        .meta-value { font-size: 0.9rem; color: #1a2c4a; font-weight: 500; word-break: break-word; }
+        .section { margin-bottom: 1.25rem; }
+        .section h5 { font-size: 0.85rem; font-weight: 700; color: #1a2c4a; margin-bottom: 0.5rem; }
+        .json-box { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 1rem; font-family: 'Consolas', monospace; font-size: 0.78rem; white-space: pre-wrap; word-break: break-word; overflow-x: auto; min-height: 80px; }
+        .json-empty { color: #94a3b8; font-style: italic; }
+        .desc-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.9rem 1rem; color: #78350f; font-size: 0.9rem; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title"><i class="fas fa-file-alt" style="color:#4a7fe0;"></i> Audit Detail</h4>
+        <a th:href="@{/audit/report}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Report</a>
+    </div>
+
+    <div class="meta-grid">
+        <div class="meta-item">
+            <div class="meta-label">Date / Time</div>
+            <div class="meta-value" th:text="${#temporals.format(audit.createdAt, 'dd MMM yyyy HH:mm:ss')}">31 Aug 2026 17:18</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">User</div>
+            <div class="meta-value" th:text="${audit.userName ?: '-'}">vikas</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Action</div>
+            <div class="meta-value" th:text="${audit.action}">UPDATE</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Entity</div>
+            <div class="meta-value" th:text="${audit.entityType}">USER</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Record ID</div>
+            <div class="meta-value" th:text="${audit.entityId != null ? audit.entityId : '-'}">25</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">IP Address</div>
+            <div class="meta-value" th:text="${audit.ipAddress ?: '-'}">127.0.0.1</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h5>Description</h5>
+        <div class="desc-box" th:text="${audit.description ?: 'No description provided.'}">Updated user Vikas</div>
+    </div>
+
+    <div class="section">
+        <h5>Previous Value</h5>
+        <div class="json-box" th:if="${audit.oldValue != null and !#strings.isEmpty(audit.oldValue)}" th:text="${audit.oldValue}">{}</div>
+        <div class="json-box json-empty" th:if="${audit.oldValue == null or #strings.isEmpty(audit.oldValue)}">No previous value recorded.</div>
+    </div>
+
+    <div class="section">
+        <h5>New Value</h5>
+        <div class="json-box" th:if="${audit.newValue != null and !#strings.isEmpty(audit.newValue)}" th:text="${audit.newValue}">{}</div>
+        <div class="json-box json-empty" th:if="${audit.newValue == null or #strings.isEmpty(audit.newValue)}">No new value recorded.</div>
+    </div>
+</div>
+</body>
+</html>

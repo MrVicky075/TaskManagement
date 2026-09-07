@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Report · TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7fc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .card { background: #fff; padding: 1.5rem 2rem; min-height: 100vh; width: 100%; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1.5rem; font-weight: 600; color: #0b1a33; display: flex; align-items: center; gap: 0.5rem; }
+        .card-title i { color: #4a7fe0; }
+        .btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.2rem; background: #f7faff; color: #2a436e; border: 1px solid #ccd7e9; border-radius: 10px; text-decoration: none; font-size: 0.875rem; }
+        .btn-back:hover { background: #edf4ff; }
+        .filter-strip { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.2rem; padding: 0.9rem 1rem; background: #f8faff; border-radius: 12px; border: 1px solid #e9edf4; align-items: end; }
+        .field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 140px; }
+        .field label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5e6f8d; letter-spacing: 0.04em; }
+        .field input, .field select { padding: 0.45rem 0.6rem; border: 1px solid #dae1ed; border-radius: 6px; font-size: 0.8rem; font-family: inherit; background: #fff; }
+        .apply-btn { padding: 0.45rem 1rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #4a7fe0, #3a6bc0); color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; height: 34px; }
+        .link-btn { background: none; border: none; color: #5e6f8d; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+        .table-responsive { overflow-x: auto; border-radius: 16px; border: 1px solid #e9edf4; background: #fff; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 980px; }
+        .table thead th { background: #f8faff; color: #1a2c4a; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; padding: 0.75rem; border-bottom: 2px solid #d7e0ec; text-align: left; white-space: nowrap; }
+        .table tbody td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #eef2f8; vertical-align: middle; color: #1e2f4a; }
+        .table tbody tr:hover td { background: #fafcff; }
+        .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; }
+        .badge-action { background: #e3f0ff; color: #1d5f9e; }
+        .badge-user { background: #fef3c7; color: #92400e; }
+        .badge-task { background: #e3f9ec; color: #1a6e4b; }
+        .badge-system { background: #e5e7eb; color: #4b5563; }
+        .view-link { color: #4a7fe0; text-decoration: none; font-size: 0.78rem; font-weight: 600; }
+        .view-link:hover { text-decoration: underline; }
+        .desc-cell { max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .footer-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid #eef2f8; font-size: 0.85rem; color: #38507a; }
+        .pagination { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+        .page-btn { padding: 0.3rem 0.75rem; border: 1px solid #d0dae9; border-radius: 6px; background: #fff; color: #1a2c4a; font-size: 0.75rem; text-decoration: none; }
+        .page-btn.active { background: #4a7fe0; color: #fff; border-color: #4a7fe0; }
+        .page-btn.disabled { opacity: 0.5; pointer-events: none; }
+        .empty { text-align: center; padding: 3rem 1rem; color: #6b7280; }
+        @media (max-width: 768px) {
+            .card { padding: 1rem; }
+            .filter-strip { flex-direction: column; align-items: stretch; }
+            .field { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">
+            <i class="fas fa-clipboard-list"></i>
+            Audit Report
+            <small th:text="'· ' + ${auditPage.totalElements} + ' records'">· 0 records</small>
+        </h4>
+        <a th:href="@{/dashboard}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <form th:action="@{/audit/report}" method="get" class="filter-strip">
+        <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" th:value="${selectedUsername}" placeholder="Search user..." />
+        </div>
+        <div class="field">
+            <label>Action</label>
+            <select name="action">
+                <option value="all" th:selected="${selectedAction == 'all'}">All Actions</option>
+                <option th:each="act : ${actions}" th:value="${act}" th:text="${act}" th:selected="${act == selectedAction}"></option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Entity Type</label>
+            <select name="entityType">
+                <option value="all" th:selected="${selectedEntityType == 'all'}">All Entities</option>
+                <option th:each="type : ${entityTypes}" th:value="${type}" th:text="${type}" th:selected="${type == selectedEntityType}"></option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Date From</label>
+            <input type="date" name="dateFrom" th:value="${dateFrom}" />
+        </div>
+        <div class="field">
+            <label>Date To</label>
+            <input type="date" name="dateTo" th:value="${dateTo}" />
+        </div>
+        <div class="field">
+            <label>&nbsp;</label>
+            <button type="submit" class="apply-btn"><i class="fas fa-search"></i> Apply</button>
+        </div>
+        <div class="field">
+            <label>&nbsp;</label>
+            <a th:href="@{/audit/report}" class="link-btn">Clear filters</a>
+        </div>
+        <input type="hidden" name="size" th:value="${pageSize}" />
+    </form>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Date / Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>Record ID</th>
+                <th>Description</th>
+                <th>IP</th>
+                <th>Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(audits)}">
+                <td colspan="8" class="empty">
+                    <i class="fas fa-clipboard-list" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+                    No audit records found.
+                </td>
+            </tr>
+            <tr th:each="audit : ${audits}">
+                <td th:text="${#temporals.format(audit.createdAt, 'dd MMM yyyy HH:mm')}">31 Aug 2026 17:18</td>
+                <td th:text="${audit.userName ?: '-'}">vikas</td>
+                <td><span class="badge badge-action" th:text="${audit.action}">UPDATE</span></td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${audit.entityType == 'USER'} ? 'badge-user' : (${audit.entityType == 'TASK'} ? 'badge-task' : 'badge-system')"
+                          th:text="${audit.entityType}">USER</span>
+                </td>
+                <td th:text="${audit.entityId != null ? audit.entityId : '-'}">25</td>
+                <td class="desc-cell" th:text="${audit.description}" th:title="${audit.description}">Updated user</td>
+                <td th:text="${audit.ipAddress ?: '-'}">127.0.0.1</td>
+                <td><a th:href="@{/audit/detail/{id}(id=${audit.auditId})}" class="view-link">View</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer-info" th:if="${auditPage.totalPages > 0}">
+        <span>
+            Showing page <b th:text="${auditPage.number + 1}">1</b> of <b th:text="${auditPage.totalPages}">1</b>
+            (<b th:text="${auditPage.totalElements}">0</b> total records)
+        </span>
+        <div class="pagination">
+            <a class="page-btn"
+               th:classappend="${auditPage.first} ? 'disabled' : ''"
+               th:href="@{/audit/report(page=${pageNumber - 1}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+                Previous
+            </a>
+            <a th:each="i : ${#numbers.sequence(0, auditPage.totalPages - 1)}"
+               class="page-btn"
+               th:classappend="${i == pageNumber} ? 'active' : ''"
+               th:text="${i + 1}"
+               th:href="@{/audit/report(page=${i}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+                1
+            </a>
+            <a class="page-btn"
+               th:classappend="${auditPage.last} ? 'disabled' : ''"
+               th:href="@{/audit/report(page=${pageNumber + 1}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+                Next
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
