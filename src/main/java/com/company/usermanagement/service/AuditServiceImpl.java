@@ -90,12 +90,14 @@ public class AuditServiceImpl implements AuditService {
     public Page<AuditDTO> searchAudits(String username,
                                        String action,
                                        String entityType,
+                                       String description,
+                                       String ipAddress,
                                        LocalDateTime dateFrom,
                                        LocalDateTime dateTo,
                                        int page,
                                        int size) {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
-        return auditRepository.searchAudits(username, action, entityType, dateFrom, dateTo, pageable)
+        return auditRepository.searchAudits(username, action, entityType, description, ipAddress, dateFrom, dateTo, pageable)
                 .map(auditMapper::toDTO);
     }
 

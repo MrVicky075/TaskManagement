@@ -32,6 +32,8 @@ public class AuditController {
             @RequestParam(value = "username", required = false, defaultValue = "") String username,
             @RequestParam(value = "action", required = false, defaultValue = "all") String action,
             @RequestParam(value = "entityType", required = false, defaultValue = "all") String entityType,
+            @RequestParam(value = "description", required = false, defaultValue = "") String description,
+            @RequestParam(value = "ipAddress", required = false, defaultValue = "") String ipAddress,
             @RequestParam(value = "dateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(value = "dateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -42,7 +44,7 @@ public class AuditController {
         LocalDateTime toDateTime = dateTo != null ? dateTo.atTime(LocalTime.MAX) : null;
 
         Page<AuditDTO> auditPage = auditService.searchAudits(
-                username, action, entityType, fromDateTime, toDateTime, page, size);
+                username, action, entityType, description, ipAddress, fromDateTime, toDateTime, page, size);
 
         model.addAttribute("currentPage", "auditReport");
         model.addAttribute("auditPage", auditPage);
@@ -50,6 +52,8 @@ public class AuditController {
         model.addAttribute("selectedUsername", username);
         model.addAttribute("selectedAction", action);
         model.addAttribute("selectedEntityType", entityType);
+        model.addAttribute("selectedDescription", description);
+        model.addAttribute("selectedIpAddress", ipAddress);
         model.addAttribute("dateFrom", dateFrom);
         model.addAttribute("dateTo", dateTo);
         model.addAttribute("pageNumber", page);

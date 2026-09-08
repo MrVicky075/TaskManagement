@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Log Detail · TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7fc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .card { background: #fff; padding: 1.5rem 2rem; min-height: 100vh; max-width: 960px; margin: 0 auto; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1.4rem; font-weight: 600; color: #0b1a33; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: #f7faff; color: #2a436e; border: 1px solid #ccd7e9; border-radius: 10px; text-decoration: none; font-size: 0.85rem; }
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+        .meta-item { background: #f8faff; border: 1px solid #e9edf4; border-radius: 10px; padding: 0.75rem 0.9rem; }
+        .meta-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #5e6f8d; margin-bottom: 0.25rem; }
+        .meta-value { font-size: 0.9rem; color: #1a2c4a; font-weight: 500; word-break: break-word; }
+        .section { margin-bottom: 1.25rem; }
+        .section h5 { font-size: 0.85rem; font-weight: 700; color: #1a2c4a; margin-bottom: 0.5rem; }
+        .desc-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 0.9rem 1rem; color: #78350f; font-size: 0.9rem; line-height: 1.5; word-break: break-word; }
+        .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 0.9rem 1rem; color: #991b1b; font-size: 0.9rem; line-height: 1.5; word-break: break-word; }
+        .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.7rem; font-weight: 600; }
+        .badge-sent { background: #e3f9ec; color: #1a6e4b; }
+        .badge-failed { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title"><i class="fas fa-envelope-open-text" style="color:#4a7fe0;"></i> Email Log Detail</h4>
+        <a th:href="@{/mail/report}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Report</a>
+    </div>
+
+    <div class="meta-grid">
+        <div class="meta-item">
+            <div class="meta-label">ID</div>
+            <div class="meta-value" th:text="${mailLog.id}">1</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Template Code</div>
+            <div class="meta-value" th:text="${mailLog.templateCode}">TEMPLATE</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Status</div>
+            <div class="meta-value">
+                <span class="badge"
+                      th:classappend="${mailLog.status != null and mailLog.status.name() == 'SENT'} ? 'badge-sent' : 'badge-failed'"
+                      th:text="${mailLog.status}">SENT</span>
+            </div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">From Email</div>
+            <div class="meta-value" th:text="${mailLog.fromEmail}">from@mail.com</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">To Email</div>
+            <div class="meta-value" th:text="${mailLog.toEmail}">to@mail.com</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">CC Email</div>
+            <div class="meta-value" th:text="${mailLog.ccEmail ?: '-'}">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Created At</div>
+            <div class="meta-value" th:text="${mailLog.createdAt != null ? #temporals.format(mailLog.createdAt, 'dd MMM yyyy HH:mm:ss') : '-'}">-</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Sent At</div>
+            <div class="meta-value" th:text="${mailLog.sentAt != null ? #temporals.format(mailLog.sentAt, 'dd MMM yyyy HH:mm:ss') : '-'}">-</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h5>Subject</h5>
+        <div class="desc-box" th:text="${mailLog.subject ?: '-'}">Subject</div>
+    </div>
+
+    <div class="section">
+        <h5>Error Message</h5>
+        <div class="error-box" th:if="${mailLog.errorMessage != null and !#strings.isEmpty(mailLog.errorMessage)}"
+             th:text="${mailLog.errorMessage}">Error</div>
+        <div class="desc-box" th:if="${mailLog.errorMessage == null or #strings.isEmpty(mailLog.errorMessage)}">No error message.</div>
+    </div>
+</div>
+</body>
+</html>

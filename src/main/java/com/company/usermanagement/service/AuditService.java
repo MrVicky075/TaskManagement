@@ -21,6 +21,8 @@ public interface AuditService {
     Page<AuditDTO> searchAudits(String username,
                                 String action,
                                 String entityType,
+                                String description,
+                                String ipAddress,
                                 LocalDateTime dateFrom,
                                 LocalDateTime dateTo,
                                 int page,

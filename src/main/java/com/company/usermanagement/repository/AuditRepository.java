@@ -18,6 +18,8 @@ public interface AuditRepository extends JpaRepository<AuditEntity, Long> {
             WHERE (:username IS NULL OR :username = '' OR LOWER(a.userName) LIKE LOWER(CONCAT('%', :username, '%')))
               AND (:action IS NULL OR :action = '' OR :action = 'all' OR a.action = :action)
               AND (:entityType IS NULL OR :entityType = '' OR :entityType = 'all' OR a.entityType = :entityType)
+              AND (:description IS NULL OR :description = '' OR LOWER(a.description) LIKE LOWER(CONCAT('%', :description, '%')))
+              AND (:ipAddress IS NULL OR :ipAddress = '' OR LOWER(a.ipAddress) LIKE LOWER(CONCAT('%', :ipAddress, '%')))
               AND (:dateFrom IS NULL OR a.createdAt >= :dateFrom)
               AND (:dateTo IS NULL OR a.createdAt <= :dateTo)
             ORDER BY a.createdAt DESC
@@ -26,6 +28,8 @@ public interface AuditRepository extends JpaRepository<AuditEntity, Long> {
             @Param("username") String username,
             @Param("action") String action,
             @Param("entityType") String entityType,
+            @Param("description") String description,
+            @Param("ipAddress") String ipAddress,
             @Param("dateFrom") LocalDateTime dateFrom,
             @Param("dateTo") LocalDateTime dateTo,
             Pageable pageable

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Report · TaskFlow</title>
+    <title>Email Audit Report · TaskFlow</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -13,6 +13,7 @@
         .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
         .card-title { font-size: 1.5rem; font-weight: 600; color: #0b1a33; display: flex; align-items: center; gap: 0.5rem; }
         .card-title i { color: #4a7fe0; }
+        .card-title small { font-size: 0.875rem; font-weight: 400; color: #5e6f8d; margin-left: 0.5rem; }
         .btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.2rem; background: #f7faff; color: #2a436e; border: 1px solid #ccd7e9; border-radius: 10px; text-decoration: none; font-size: 0.875rem; }
         .btn-back:hover { background: #edf4ff; }
         .filter-strip { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.2rem; padding: 0.9rem 1rem; background: #f8faff; border-radius: 12px; border: 1px solid #e9edf4; align-items: end; }
@@ -22,18 +23,16 @@
         .apply-btn { padding: 0.45rem 1rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #4a7fe0, #3a6bc0); color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; height: 34px; }
         .link-btn { background: none; border: none; color: #5e6f8d; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
         .table-responsive { overflow-x: auto; border-radius: 16px; border: 1px solid #e9edf4; background: #fff; }
-        .table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 980px; }
-        .table thead th { background: #f8faff; color: #1a2c4a; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; padding: 0.75rem; border-bottom: 2px solid #d7e0ec; text-align: left; white-space: nowrap; }
-        .table tbody td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #eef2f8; vertical-align: middle; color: #1e2f4a; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1400px; }
+        .table thead th { background: #f8faff; color: #1a2c4a; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; padding: 0.75rem; border-bottom: 2px solid #d7e0ec; text-align: left; white-space: nowrap; }
+        .table tbody td { padding: 0.6rem 0.7rem; border-bottom: 1px solid #eef2f8; vertical-align: middle; color: #1e2f4a; }
         .table tbody tr:hover td { background: #fafcff; }
         .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; }
-        .badge-action { background: #e3f0ff; color: #1d5f9e; }
-        .badge-user { background: #fef3c7; color: #92400e; }
-        .badge-task { background: #e3f9ec; color: #1a6e4b; }
-        .badge-system { background: #e5e7eb; color: #4b5563; }
+        .badge-sent { background: #e3f9ec; color: #1a6e4b; }
+        .badge-failed { background: #fee2e2; color: #991b1b; }
         .view-link { color: #4a7fe0; text-decoration: none; font-size: 0.78rem; font-weight: 600; }
         .view-link:hover { text-decoration: underline; }
-        .desc-cell { max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .truncate { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
         .footer-info { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid #eef2f8; font-size: 0.85rem; color: #38507a; }
         .pagination { display: flex; gap: 0.35rem; flex-wrap: wrap; }
         .page-btn { padding: 0.3rem 0.75rem; border: 1px solid #d0dae9; border-radius: 6px; background: #fff; color: #1a2c4a; font-size: 0.75rem; text-decoration: none; }
@@ -51,41 +50,30 @@
 <div class="card">
     <div class="card-header">
         <h4 class="card-title">
-            <i class="fas fa-clipboard-list"></i>
-            Audit Report
-            <small th:text="'· ' + ${auditPage.totalElements} + ' records'">· 0 records</small>
+            <i class="fas fa-envelope-open-text"></i>
+            Email Audit Report
+            <small th:text="'· ' + ${mailPage.totalElements} + ' records'">· 0 records</small>
         </h4>
         <a th:href="@{/dashboard}" class="btn-back">
             <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 
-    <form th:action="@{/audit/report}" method="get" class="filter-strip">
+    <form th:action="@{/mail/report}" method="get" class="filter-strip">
         <div class="field">
-            <label>Username</label>
-            <input type="text" name="username" th:value="${selectedUsername}" placeholder="Search user..." />
+            <label>Template Code</label>
+            <input type="text" name="templateCode" th:value="${selectedTemplateCode}" placeholder="Template..." />
         </div>
         <div class="field">
-            <label>Action</label>
-            <select name="action">
-                <option value="all" th:selected="${selectedAction == 'all'}">All Actions</option>
-                <option th:each="act : ${actions}" th:value="${act}" th:text="${act}" th:selected="${act == selectedAction}"></option>
+            <label>To Email</label>
+            <input type="text" name="toEmail" th:value="${selectedToEmail}" placeholder="Search to..." />
+        </div>
+        <div class="field">
+            <label>Status</label>
+            <select name="status">
+                <option value="all" th:selected="${selectedStatus == 'all'}">All Status</option>
+                <option th:each="st : ${statusOptions}" th:value="${st}" th:text="${st}" th:selected="${st == selectedStatus}"></option>
             </select>
-        </div>
-        <div class="field">
-            <label>Entity Type</label>
-            <select name="entityType">
-                <option value="all" th:selected="${selectedEntityType == 'all'}">All Entities</option>
-                <option th:each="type : ${entityTypes}" th:value="${type}" th:text="${type}" th:selected="${type == selectedEntityType}"></option>
-            </select>
-        </div>
-        <div class="field" style="min-width:180px;">
-            <label>Description</label>
-            <input type="text" name="description" th:value="${selectedDescription}" placeholder="Search description..." />
-        </div>
-        <div class="field">
-            <label>IP</label>
-            <input type="text" name="ipAddress" th:value="${selectedIpAddress}" placeholder="Search IP..." />
         </div>
         <div class="field">
             <label>Date From</label>
@@ -101,7 +89,7 @@
         </div>
         <div class="field">
             <label>&nbsp;</label>
-            <a th:href="@{/audit/report}" class="link-btn">Clear filters</a>
+            <a th:href="@{/mail/report}" class="link-btn">Clear filters</a>
         </div>
         <input type="hidden" name="size" th:value="${pageSize}" />
     </form>
@@ -110,62 +98,74 @@
         <table class="table">
             <thead>
             <tr>
-                <th>Date / Time</th>
-                <th>User</th>
-                <th>Action</th>
-                <th>Entity</th>
-                <th>Record ID</th>
-                <th>Description</th>
-                <th>IP</th>
+                <th>ID</th>
+                <th>Template Code</th>
+                <th>To Email</th>
+                <th>CC Email</th>
+                <th>From Email</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Error Message</th>
+                <th>Created At</th>
+                <th>Sent At</th>
                 <th>Details</th>
             </tr>
             </thead>
             <tbody>
-            <tr th:if="${#lists.isEmpty(audits)}">
-                <td colspan="8" class="empty">
-                    <i class="fas fa-clipboard-list" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
-                    No audit records found.
+            <tr th:if="${#lists.isEmpty(mailLogs)}">
+                <td colspan="11" class="empty">
+                    <i class="fas fa-envelope-open-text" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+                    No mail log records found.
                 </td>
             </tr>
-            <tr th:each="audit : ${audits}">
-                <td th:text="${#temporals.format(audit.createdAt, 'dd MMM yyyy HH:mm')}">31 Aug 2026 17:18</td>
-                <td th:text="${audit.userName ?: '-'}">vikas</td>
-                <td><span class="badge badge-action" th:text="${audit.action}">UPDATE</span></td>
+            <tr th:each="mail : ${mailLogs}">
+                <td th:text="${mail.id}">1</td>
+                <td th:text="${mail.templateCode}">TEMPLATE</td>
+                <td th:text="${mail.toEmail}">to@mail.com</td>
+                <td>
+                    <span class="truncate" th:text="${mail.ccEmail ?: '-'}" th:title="${mail.ccEmail}">-</span>
+                </td>
+                <td th:text="${mail.fromEmail}">from@mail.com</td>
+                <td>
+                    <span class="truncate" th:text="${mail.subject}" th:title="${mail.subject}">Subject</span>
+                </td>
                 <td>
                     <span class="badge"
-                          th:classappend="${audit.entityType == 'USER'} ? 'badge-user' : (${audit.entityType == 'TASK'} ? 'badge-task' : 'badge-system')"
-                          th:text="${audit.entityType}">USER</span>
+                          th:classappend="${mail.status != null and mail.status.name() == 'SENT'} ? 'badge-sent' : 'badge-failed'"
+                          th:text="${mail.status}">SENT</span>
                 </td>
-                <td th:text="${audit.entityId != null ? audit.entityId : '-'}">25</td>
-                <td class="desc-cell" th:text="${audit.description}" th:title="${audit.description}">Updated user</td>
-                <td th:text="${audit.ipAddress ?: '-'}">127.0.0.1</td>
-                <td><a th:href="@{/audit/detail/{id}(id=${audit.auditId})}" class="view-link">View</a></td>
+                <td>
+                    <span class="truncate" th:text="${mail.errorMessage ?: '-'}" th:title="${mail.errorMessage}">-</span>
+                </td>
+                <td th:text="${mail.createdAt != null ? #temporals.format(mail.createdAt, 'dd MMM yyyy HH:mm') : '-'}">01 Jan 2026</td>
+                <td th:text="${mail.sentAt != null ? #temporals.format(mail.sentAt, 'dd MMM yyyy HH:mm') : '-'}">-</td>
+                <td><a th:href="@{/mail/detail/{id}(id=${mail.id})}" class="view-link">View</a></td>
             </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="footer-info" th:if="${auditPage.totalPages > 0}">
+    <div class="footer-info" th:if="${mailPage.totalPages > 0}">
         <span>
-            Showing page <b th:text="${auditPage.number + 1}">1</b> of <b th:text="${auditPage.totalPages}">1</b>
-            (<b th:text="${auditPage.totalElements}">0</b> total records)
+            Showing page <b th:text="${mailPage.number + 1}">1</b> of <b th:text="${mailPage.totalPages}">1</b>
+            (<b th:text="${mailPage.totalElements}">0</b> total records)
         </span>
         <div class="pagination">
             <a class="page-btn"
-               th:classappend="${auditPage.first} ? 'disabled' : ''"
-               th:href="@{/audit/report(page=${pageNumber - 1}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, description=${selectedDescription}, ipAddress=${selectedIpAddress}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+               th:classappend="${mailPage.first} ? 'disabled' : ''"
+               th:href="@{/mail/report(page=${pageNumber - 1}, size=${pageSize}, templateCode=${selectedTemplateCode}, toEmail=${selectedToEmail}, status=${selectedStatus}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
                 Previous
             </a>
-            <a th:each="i : ${#numbers.sequence(0, auditPage.totalPages - 1)}"
+            <a th:each="i : ${#numbers.sequence(0, mailPage.totalPages - 1)}"
                class="page-btn"
                th:classappend="${i == pageNumber} ? 'active' : ''"
                th:text="${i + 1}"
-               th:href="@{/audit/report(page=${i}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, description=${selectedDescription}, ipAddress=${selectedIpAddress}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+               th:href="@{/mail/report(page=${i}, size=${pageSize}, templateCode=${selectedTemplateCode}, toEmail=${selectedToEmail}, status=${selectedStatus}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
                 1
             </a>
             <a class="page-btn"
-               th:classappend="${auditPage.last} ? 'disabled' : ''"
-               th:href="@{/audit/report(page=${pageNumber + 1}, size=${pageSize}, username=${selectedUsername}, action=${selectedAction}, entityType=${selectedEntityType}, description=${selectedDescription}, ipAddress=${selectedIpAddress}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
+               th:classappend="${mailPage.last} ? 'disabled' : ''"
+               th:href="@{/mail/report(page=${pageNumber + 1}, size=${pageSize}, templateCode=${selectedTemplateCode}, toEmail=${selectedToEmail}, status=${selectedStatus}, dateFrom=${dateFrom}, dateTo=${dateTo})}">
                 Next
             </a>
         </div>

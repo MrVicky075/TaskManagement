@@ -597,12 +597,17 @@
                 Audit Report
             </a>
 
+            <a th:href="@{/mail/report}" class="nav-item" th:classappend="${currentPage == 'mailAuditReport'} ? 'active' : ''">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                Email Audit Report
+            </a>
+
             <div class="nav-label">Excel</div>
 
-            <a th:href="@{/dashboard/excelUploadPage}" class="nav-item" th:classappend="${currentPage == 'addTask'} ? 'active' : ''">
+           <!-- <a th:href="@{/dashboard/excelUploadPage}" class="nav-item" th:classappend="${currentPage == 'addTask'} ? 'active' : ''">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
                 Upload Excel
-            </a>
+            </a>-->
 
             <a th:href="@{/excel/export-tasks}" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -848,7 +853,13 @@
                         <div>
                             <div class="tid">Task</div>
                             <div class="tid-num" th:text="'TSK-' + ${task.taskId}">TSK-0000 - ${task.taskId}</div>
-                            <div class="rm">Redmine <a href="#" onclick="return false;">#<span th:text="${task.redmineId}">0</span></a></div>
+                           <!-- <div class="rm">Redmine <a href="#" onclick="return false;">#<span th:text="${task.redmineId}">0</span></a></div>-->
+                            <div class="rm">
+                                Redmine
+                                <a th:href="'http://192.168.100.61:4300/redmine/issues/' + ${task.redmineId}"
+                                   target="_blank"
+                                   th:text="'#' + ${task.redmineId}">#0</a>
+                            </div>
                         </div>
                         <div class="stamp" th:classappend="${task.priority == 'P1' ? '' : task.priority == 'P2' ? 'p2' : 'p3'}"
                              th:text="${task.priority}">P3</div>

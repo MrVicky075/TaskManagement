@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Boolean existsByEmail(String email);
     UserEntity findByUserName(String username);
 
-    @Query("SELECT u FROM UserEntity u WHERE u.isActive = true AND u.userId NOT IN (1)")
+    @Query("SELECT u FROM UserEntity u WHERE u.userId NOT IN (1)")
     List<UserEntity> findAllActiveUsers();
 
 
