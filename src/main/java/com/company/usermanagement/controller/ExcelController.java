@@ -1,5 +1,6 @@
 package com.company.usermanagement.controller;
 
+import com.company.usermanagement.dto.TaskDTO;
 import com.company.usermanagement.entity.TaskEntity;
 import com.company.usermanagement.entity.UserEntity;
 import com.company.usermanagement.service.TaskService;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -237,6 +240,140 @@ public class ExcelController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/export-tasks")
+    public ResponseEntity<byte[]> exportAllTasks() {
+        try {
+            List<TaskDTO> tasks = taskService.getAllTasks();
+            byte[] excelContent = generateTasksExport(tasks);
+
+            String fileName = "tasks_export_" +
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", fileName);
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelContent);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private byte[] generateTasksExport(List<TaskDTO> tasks) {
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+        String[] headers = {
+                "Task ID", "Client", "Requirement", "Task Details", "Remarks",
+                "Assigned To", "Priority", "Status", "Issue", "Fixed On",
+                "Days", "Redmine ID", "Active", "Created At", "Updated At",
+                "Created By", "Updated By"
+        };
+
+        Map<Long, String> userNameById = new HashMap<>();
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Tasks");
+
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 11);
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+
+            CellStyle dataStyle = workbook.createCellStyle();
+            dataStyle.setBorderBottom(BorderStyle.THIN);
+            dataStyle.setBorderTop(BorderStyle.THIN);
+            dataStyle.setBorderLeft(BorderStyle.THIN);
+            dataStyle.setBorderRight(BorderStyle.THIN);
+            dataStyle.setWrapText(true);
+
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            int rowNum = 1;
+            for (TaskDTO task : tasks) {
+                Row row = sheet.createRow(rowNum++);
+                Object[] values = {
+                        task.getTaskId() != null ? "TSK-" + task.getTaskId() : "",
+                        nullToDash(task.getClientName()),
+                        nullToDash(task.getRequirement()),
+                        nullToDash(task.getTaskDetails()),
+                        nullToDash(task.getRemarks()),
+                        nullToDash(task.getAssignUserName()),
+                        nullToDash(task.getPriority()),
+                        nullToDash(task.getStatus()),
+                        nullToDash(task.getIssue()),
+                        nullToDash(task.getFixedOn()),
+                        task.getDays() != null ? task.getDays() : "",
+                        task.getRedmineId() != null ? task.getRedmineId() : "",
+                        task.getIsActive() != null ? (task.getIsActive() ? "Yes" : "No") : "",
+                        task.getCreateAt() != null ? task.getCreateAt().format(dateFmt) : "",
+                        task.getUpdateAt() != null ? task.getUpdateAt().format(dateFmt) : "",
+                        resolveUserName(task.getCreateBy(), userNameById),
+                        resolveUserName(task.getUpdatedBy(), userNameById)
+                };
+
+                for (int i = 0; i < values.length; i++) {
+                    Cell cell = row.createCell(i);
+                    Object value = values[i];
+                    if (value instanceof Number) {
+                        cell.setCellValue(((Number) value).doubleValue());
+                    } else {
+                        cell.setCellValue(value != null ? value.toString() : "");
+                    }
+                    cell.setCellStyle(dataStyle);
+                }
+            }
+
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+                int width = sheet.getColumnWidth(i);
+                if (width > 15000) {
+                    sheet.setColumnWidth(i, 15000);
+                }
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error exporting tasks to Excel: " + e.getMessage(), e);
+        }
+    }
+
+    private String resolveUserName(Long userId, Map<Long, String> cache) {
+        if (userId == null) {
+            return "-";
+        }
+        return cache.computeIfAbsent(userId, id -> {
+            UserEntity user = userService.findById(id);
+            if (user != null && user.getUserName() != null && !user.getUserName().isBlank()) {
+                return user.getUserName();
+            }
+            return "-";
+        });
+    }
+
+    private String nullToDash(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return "-";
+        }
+        return value;
     }
 
     private byte[] generateExcelFile(List<Map<String, Object>> sampleData) {

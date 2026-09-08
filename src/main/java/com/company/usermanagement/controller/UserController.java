@@ -35,6 +35,7 @@ public class UserController {
     @PostMapping("/save")
     public String saveUser(@Valid @ModelAttribute("user") UserRequestDTO request, BindingResult result, Model model){
         if(result.hasErrors()){
+            model.addAttribute("roleList", AppConstants.getUserRoles());
             return "users/user-form";
         }
         userService.createUser(request);
@@ -49,11 +50,15 @@ public class UserController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable Long id, @Valid @ModelAttribute("user") UserResponseDTO request, BindingResult result, Model model){
-        if(result.hasErrors()){
-            return "users/user-form";
+    public String updateUser(@PathVariable Long id,
+                             @Valid @ModelAttribute("user") UserResponseDTO request,
+                             BindingResult result,
+                             Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("roleList", AppConstants.getUserRoles());
+            return "users/user-edit";
         }
-        userService.updateUser(id,request);
+        userService.updateUser(id, request);
         return "redirect:/users?updated";
     }
 

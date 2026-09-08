@@ -1,17 +1,19 @@
 package com.company.usermanagement.service;
 
-
 import com.company.usermanagement.audit.AuditAction;
 import com.company.usermanagement.audit.AuditEntityType;
 import com.company.usermanagement.audit.AuditSnapshotUtil;
 import com.company.usermanagement.dto.TaskDTO;
 import com.company.usermanagement.entity.TaskEntity;
+import com.company.usermanagement.entity.UserEntity;
 import com.company.usermanagement.exception.ResourceNotFoundException;
 import com.company.usermanagement.mapper.TaskMapper;
 import com.company.usermanagement.repository.TaskRepository;
 import com.company.usermanagement.session.UserLoginSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,21 +25,29 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
+    private static final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
+
     private final TaskRepository taskRepository;
     private final TaskMapper mapper;
     private final UserLoginSession userLoginSession;
     private final AuditService auditService;
+    private final MailService mailService;
 
     @Override
     @Transactional
     public TaskDTO saveTask(TaskDTO taskDTO) {
-        Long currentUser= userLoginSession.getUserId();
+        Long currentUser = userLoginSession.getUserId();
         taskDTO.setCreateBy(currentUser);
         taskDTO.setUpdatedBy(currentUser);
         taskDTO.setCreateAt(LocalDateTime.now());
         taskDTO.setUpdateAt(LocalDateTime.now());
         taskDTO.setIsActive(true);
         TaskEntity saved = taskRepository.save(mapper.toEntity(taskDTO));
+        // Ensure assigned user is available for mail
+        if (saved.getAssignedUser() != null) {
+            saved.getAssignedUser().getEmail();
+        }
+        log.info("Task creation completed for taskId={}", saved.getTaskId());
 
         auditService.log(
                 AuditAction.CREATE,
@@ -47,6 +57,13 @@ public class TaskServiceImpl implements TaskService {
                 null,
                 AuditSnapshotUtil.taskSnapshot(saved)
         );
+
+        try {
+            mailService.sendTaskCreatedEmail(saved);
+        } catch (Exception ex) {
+            log.error("Task id={} created but notification email failed", saved.getTaskId(), ex);
+        }
+
         return mapper.toDTO(saved);
     }
 
@@ -66,7 +83,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDTO getTaskById(Long taskId) {
-        return mapper.toDTO(taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId)));
+        return mapper.toDTO(taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId)));
     }
 
     @Override
@@ -82,7 +100,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskDTO updateTask(Long taskId, TaskDTO taskDTO) {
-        TaskEntity existingTask = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        TaskEntity existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        // Touch lazy relation before snapshot/mail
+        if (existingTask.getAssignedUser() != null) {
+            existingTask.getAssignedUser().getEmail();
+        }
+
         Map<String, Object> before = AuditSnapshotUtil.taskSnapshot(existingTask);
 
         taskDTO.setCreateBy(existingTask.getCreatedBy());
@@ -94,18 +118,39 @@ public class TaskServiceImpl implements TaskService {
         }
         mapper.updateTaskEntity(taskDTO, existingTask);
         TaskEntity saved = taskRepository.save(existingTask);
+        if (saved.getAssignedUser() != null) {
+            saved.getAssignedUser().getEmail();
+        }
         Map<String, Object> after = AuditSnapshotUtil.taskSnapshot(saved);
+        log.info("Task update completed for taskId={}", saved.getTaskId());
 
         logTaskUpdateAudit(taskId, before, after);
+
+        try {
+            mailService.sendTaskUpdatedEmail(before, saved);
+        } catch (Exception ex) {
+            log.error("Task id={} updated but notification email failed", saved.getTaskId(), ex);
+        }
+
         return mapper.toDTO(saved);
     }
 
     @Override
     @Transactional
     public void deleteTask(Long taskId) {
-        TaskEntity existingTask = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+        TaskEntity existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
+        // Capture assigned user + details BEFORE soft-delete
+        UserEntity assignedUser = existingTask.getAssignedUser();
+        if (assignedUser != null) {
+            assignedUser.getEmail();
+            assignedUser.getUserName();
+        }
         Map<String, Object> before = AuditSnapshotUtil.taskSnapshot(existingTask);
+
         taskRepository.deleteTaskById(taskId);
+        log.info("Task deletion completed for taskId={}", taskId);
 
         auditService.log(
                 AuditAction.DELETE,
@@ -115,10 +160,17 @@ public class TaskServiceImpl implements TaskService {
                 before,
                 AuditSnapshotUtil.singleValueMap("isActive", false)
         );
+
+        try {
+            mailService.sendTaskDeletedEmail(existingTask);
+        } catch (Exception ex) {
+            log.error("Task id={} deleted but notification email failed", taskId, ex);
+        }
     }
 
     @Override
-    public List<TaskDTO> getFilteredTasks(String client, String assignedTo, String issueType, String priority, String status, String fixedOn, String dateFrom, String dateTo) {
+    public List<TaskDTO> getFilteredTasks(String client, String assignedTo, String issueType, String priority,
+                                          String status, String fixedOn, String dateFrom, String dateTo) {
         Long assignedUserId = null;
         if (!"all".equals(assignedTo) && assignedTo != null && !assignedTo.isEmpty()) {
             try {

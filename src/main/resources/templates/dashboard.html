@@ -255,7 +255,8 @@
   .chip.issue{ background:var(--slate-soft); color:var(--slate); }
   .chip.days{ background:transparent; border:1px solid var(--line); color:var(--text-soft); }
 
-  .grid-3{ display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:18px; margin:14px 0 12px; }
+  .grid-3{ display:grid; grid-template-columns:repeat(5, 1fr); gap:18px; margin:14px 0 12px; }
+  @media (max-width:980px){ .grid-3{ grid-template-columns:repeat(3, 1fr); } }
   @media (max-width:760px){ .grid-3{ grid-template-columns:1fr; } }
   .fld-label{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); font-weight:600; margin-bottom:4px; }
   .fld-value{ font-size:13px; color:var(--text); line-height:1.45; }
@@ -539,6 +540,18 @@
         color: #4b5563;
         border: 1px solid #d1d5db;
     }
+
+    .chip.paid-paid {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .chip.paid-unpaid {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
 </style>
 </head>
 <body>
@@ -570,6 +583,7 @@
             Manage Task
         </a>
 
+
         <div sec:authorize="hasAnyRole('ADMIN','SR_DEVELOPER','SUPPORT')">
             <div class="nav-label">Administrator</div>
 
@@ -578,15 +592,27 @@
                 Manage Users
             </a>
 
+            <a th:href="@{/audit/report}" class="nav-item" th:classappend="${currentPage == 'auditReport'} ? 'active' : ''">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
+                Audit Report
+            </a>
+
+            <div class="nav-label">Excel</div>
+
             <a th:href="@{/dashboard/excelUploadPage}" class="nav-item" th:classappend="${currentPage == 'addTask'} ? 'active' : ''">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
                 Upload Excel
             </a>
 
-            <a th:href="@{/audit/report}" class="nav-item" th:classappend="${currentPage == 'auditReport'} ? 'active' : ''">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
-                Audit Report
+            <a th:href="@{/excel/export-tasks}" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/>
+                    <path d="M14 3v6h6"/>
+                    <path d="M12 11v6M9 14l3 3 3-3"/>
+                </svg>
+                Export Excel
             </a>
+
         </div>
 
         <div class="sidebar-foot" id="userMenu">
@@ -849,6 +875,11 @@
                                       th:attr="data-status=${task.status}"
                                       th:classappend="${task.status == '-' ? 'status-dash' : 'status-' + #strings.replace(#strings.toLowerCase(task.status ?: ''), ' ', '-')}"
                                       th:text="${task.status}">New</span>
+                                <!-- Paid Chip -->
+                               <!-- <span class="chip"
+                                      th:with="paidDisplay=${task.paid != null ? task.paid : 'Paid'}"
+                                      th:classappend="'paid-' + ${#strings.toLowerCase(paidDisplay)}"
+                                      th:text="${paidDisplay}">Paid</span>-->
                                 <!-- Priority Chip -->
                                 <span class="chip priority" th:classappend="'priority-' + ${task.priority?.toLowerCase()}"
                                       style="font-weight:700;" th:text="${task.priority}">P3</span>
@@ -872,8 +903,13 @@
                             </div>
                         </div>
 
-                        <!-- Grid 3 Columns for Remarks -->
+                        <!-- Grid columns: Status, Paid, Remarks, Fixed On, Redmine ID -->
                         <div class="grid-3">
+                            <!--<div>
+                                <div class="fld-label">Status</div>
+                                <div class="fld-value" th:text="${task.status} ?: '-'">Status</div>
+                            </div>
+                            -->
                             <div>
                                 <div class="fld-label">Remarks</div>
                                 <div class="fld-value" th:classappend="${task.remarks} ? '' : 'muted'"
@@ -884,9 +920,13 @@
                                 <div class="fld-value" th:text="${task.fixedOn} ?: 'Not set'">Staging</div>
                             </div>
                             <div>
+                                <div class="fld-label">Paid</div>
+                                <div class="fld-value" th:text="${task.paid != null ? task.paid : 'Paid'}">Paid</div>
+                            </div>
+                           <!-- <div>
                                 <div class="fld-label">Redmine ID</div>
                                 <div class="fld-value" th:text="${task.redmineId} ?: 'N/A'">#12345</div>
-                            </div>
+                            </div>-->
                         </div>
 
                         <!-- Footer -->
@@ -896,7 +936,9 @@
                                 Assigned to <b th:text="${task.assignUserName}">User</b>
                             </div>
                             <div class="actions">
-                                <a th:href="@{/tasks/editTask/{id}(id=${task.taskId})}" class="act-btn">
+                                <a th:if="${task.canEdit}"
+                                   th:href="@{/tasks/editTask/{id}(id=${task.taskId})}"
+                                   class="act-btn">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
                                         <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>
                                     </svg>

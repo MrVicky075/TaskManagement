@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.company</groupId>
-	<artifactId>usermanagement</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>TaskManagement</artifactId>
+	<version>1.0</version>
 	<name/>
 	<description/>
 	<url/>
@@ -139,6 +139,11 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
 	</dependencies>

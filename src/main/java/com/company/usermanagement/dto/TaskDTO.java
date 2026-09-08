@@ -1,5 +1,6 @@
 package com.company.usermanagement.dto;
 
+import com.company.usermanagement.entity.UserEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,8 +19,11 @@ public class TaskDTO {
     @NotNull(message = "Assign ID is required")
     private Long assignUserId;
     private String assignUserName;
+    private UserEntity.UserRole assignUserRole;
 
     private String priority = "-";
+
+    private String paid = "Paid";
 
     @NotBlank(message = "Client name is required")
     @Size(max = 255, message = "Client name must be less than 255 characters")
@@ -52,5 +56,6 @@ public class TaskDTO {
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
 
-
+    /** UI flag: whether logged-in user may see Edit for this task. */
+    private boolean canEdit;
 }

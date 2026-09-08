@@ -467,6 +467,17 @@
           </select>
         </div>
 
+        <!-- ===== Paid ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-money-bill-wave"></i> Paid</label>
+          <select id="f_paid" th:field="*{paid}">
+            <option th:each="item : ${paidList}"
+                    th:value="${item.key}"
+                    th:text="${item.value}">
+            </option>
+          </select>
+        </div>
+
         <!-- ===== Client Name ===== -->
         <div class="form-field">
           <label><i class="fas fa-building"></i> Client Name</label>

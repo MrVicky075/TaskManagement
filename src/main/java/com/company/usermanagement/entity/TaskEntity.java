@@ -28,6 +28,9 @@ public class TaskEntity {
     @Column(name = "priority", length = 20)
     private String priority = "-";
 
+    @Column(name = "paid", length = 20)
+    private String paid = "Paid";
+
     @Column(name = "client_name", length = 255)
     private String clientName;
 

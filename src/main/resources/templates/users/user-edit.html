@@ -3,459 +3,285 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit User </title>
-
-  <!-- Google Fonts -->
+  <title>Edit User</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #f2f6fc;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 2rem 1rem;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 2rem 1rem;
         }
-
         .form-card {
-            background: #ffffff;
-            max-width: 820px;
-            width: 100%;
-            border-radius: 28px;
+            background: #ffffff; max-width: 820px; width: 100%; border-radius: 28px;
             padding: 2.5rem 2.8rem 2.8rem;
             box-shadow: 0 20px 40px -12px rgba(0, 20, 40, 0.15);
             border: 1px solid #e8edf5;
-            transition: all 0.2s ease;
         }
-
-        .form-card:hover {
-            box-shadow: 0 24px 48px -12px rgba(0, 20, 40, 0.2);
-        }
-
         .form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e6ecf5;
-            padding-bottom: 1.2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #e6ecf5; padding-bottom: 1.2rem; margin-bottom: 2rem;
+            flex-wrap: wrap; gap: 0.5rem;
         }
-
         .form-header h2 {
-            font-weight: 600;
-            font-size: 1.6rem;
-            letter-spacing: -0.02em;
-            color: #0b1c34;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
+            font-weight: 600; font-size: 1.6rem; color: #0b1c34;
+            display: flex; align-items: center; gap: 0.6rem;
         }
-
-        .form-header h2 i {
-            color: #4a7fe0;
-        }
-
-        .form-header h2 small {
-            font-size: 0.85rem;
-            font-weight: 400;
-            color: #5d7395;
-            margin-left: 0.3rem;
-        }
-
+        .form-header h2 i { color: #4a7fe0; }
+        .form-header h2 small { font-size: 0.85rem; font-weight: 400; color: #5d7395; margin-left: 0.3rem; }
         .form-header .badge-role {
-            background: #eef3fc;
-            color: #1f3f6b;
-            padding: 0.3rem 1.2rem;
-            border-radius: 50px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            letter-spacing: 0.03em;
-            border: 1px solid #d1ddea;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
+            background: #eef3fc; color: #1f3f6b; padding: 0.3rem 1.2rem; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 500; border: 1px solid #d1ddea;
+            display: inline-flex; align-items: center; gap: 0.4rem;
         }
-
-        .form-header .badge-role i {
-            font-size: 0.65rem;
-            color: #6f8fc9;
-        }
-
-        /* grid form */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem 2rem;
-        }
-
-        .field-full {
-            grid-column: 1 / -1;
-        }
-
-        .field-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+        .field-full { grid-column: 1 / -1; }
+        .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
         .field-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1f3452;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            font-size: 0.8rem; font-weight: 600; color: #1f3452; text-transform: uppercase;
+            display: flex; align-items: center; gap: 0.3rem;
         }
-
-        .field-group label .required {
-            color: #c53e4b;
-            font-weight: 700;
-            margin-left: 2px;
+        .field-group label .required { color: #c53e4b; font-weight: 700; }
+        .field-group label i { font-size: 0.7rem; color: #6f8fc9; }
+        .field-group input, .field-group select {
+            background: #fafcff; border: 1.5px solid #dae1ed; border-radius: 12px;
+            padding: 0.75rem 1rem; font-size: 0.95rem; font-family: 'Inter', sans-serif;
+            color: #0a1e3c; outline: none; width: 100%;
         }
-
-        .field-group label i {
-            font-size: 0.7rem;
-            color: #6f8fc9;
+        .field-group input:focus, .field-group select:focus {
+            border-color: #4a7fe0; box-shadow: 0 0 0 4px rgba(74, 127, 224, 0.10); background: #ffffff;
         }
-
-        .field-group input,
-        .field-group select {
-            background: #fafcff;
-            border: 1.5px solid #dae1ed;
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            color: #0a1e3c;
-            transition: 0.2s;
-            outline: none;
-            width: 100%;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        .field-group input.error, .field-group select.error {
+            border-color: #dc2626; box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
         }
-
-        .field-group input:focus,
-        .field-group select:focus {
-            border-color: #4a7fe0;
-            box-shadow: 0 0 0 4px rgba(74, 127, 224, 0.10);
-            background: #ffffff;
-        }
-
-        .field-group input.error,
-        .field-group select.error {
-            border-color: #dc2626;
-            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
-        }
-
-        .field-group input::placeholder {
-            color: #97abc9;
-            font-weight: 400;
-            font-size: 0.9rem;
-        }
-
-        .field-group .hint {
-            font-size: 0.7rem;
-            color: #6982a8;
-            margin-top: 0.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .field-group .hint i {
-            font-size: 0.6rem;
-        }
-
+        .field-group input:disabled { background: #f1f5f9; color: #64748b; cursor: not-allowed; }
         .field-group .error-message {
-            font-size: 0.75rem;
-            color: #dc2626;
-            margin-top: 0.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            font-size: 0.75rem; color: #dc2626; margin-top: 0.2rem;
+            display: none; align-items: center; gap: 0.3rem;
         }
-
-        .field-group .error-message i {
-            font-size: 0.65rem;
-        }
-
-        /* buttons */
+        .field-group .error-message.show { display: flex; }
+        .field-group .error-message.server { display: flex; }
         .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 2.2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e6ecf5;
-            flex-wrap: wrap;
+            display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2.2rem;
+            padding-top: 1.5rem; border-top: 1px solid #e6ecf5; flex-wrap: wrap;
         }
-
         .btn {
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            font-size: 0.9rem;
-            padding: 0.7rem 2rem;
-            border-radius: 60px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            background: transparent;
-            letter-spacing: 0.01em;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem;
+            padding: 0.7rem 2rem; border-radius: 60px; border: 1px solid transparent;
+            cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, #4a7fe0, #3a6bc0);
-            color: white;
-            border-color: #4a7fe0;
+            background: linear-gradient(135deg, #4a7fe0, #3a6bc0); color: white;
             box-shadow: 0 4px 12px rgba(74, 127, 224, 0.3);
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(74, 127, 224, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0px);
-        }
-
-        .btn-secondary {
-            border-color: #ccd7e9;
-            color: #2a436e;
-            background: #f7faff;
-        }
-
-        .btn-secondary:hover {
-            background: #edf4ff;
-            border-color: #b0c4e2;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            border-color: #f5d6db;
-            color: #a5424f;
-            background: #fff6f7;
-        }
-
-        .btn-danger:hover {
-            background: #ffe9ec;
-            border-color: #e9bcc3;
-            transform: translateY(-2px);
-        }
-
-        .btn i {
-            font-size: 0.85rem;
-        }
-
-        /* Responsive */
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary { border-color: #ccd7e9; color: #2a436e; background: #f7faff; }
+        .btn-back { border-color: #ccd7e9; color: #2a436e; background: #f7faff; }
         @media (max-width: 768px) {
-            .form-card {
-                padding: 1.8rem 1.5rem 2rem;
-                border-radius: 20px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 1.2rem;
-            }
-
-            .form-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .form-actions {
-                flex-direction: column-reverse;
-            }
-
-            .form-actions .btn {
-                width: 100%;
-                justify-content: center;
-                padding: 0.7rem 1.5rem;
-            }
+            .form-card { padding: 1.8rem 1.5rem 2rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column-reverse; }
+            .form-actions .btn { width: 100%; justify-content: center; }
         }
-
-        @media (max-width: 480px) {
-            .form-card {
-                padding: 1.2rem 1rem 1.5rem;
-                border-radius: 16px;
-            }
-
-            .form-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .field-group input,
-            .field-group select {
-                font-size: 0.85rem;
-                padding: 0.65rem 0.85rem;
-            }
-        }
-    </style>
+  </style>
 </head>
 <body>
 
 <div class="form-card">
-  <!-- Header -->
   <div class="form-header">
     <h2>
-      <i class="fas fa-user-plus"></i>
+      <i class="fas fa-user-edit"></i>
       Edit User
       <small>· Edit Account</small>
     </h2>
     <span class="badge-role">
-            <i class="fas fa-shield-alt"></i>
-            Role Management
-        </span>
+      <i class="fas fa-shield-alt"></i>
+      Role Management
+    </span>
   </div>
 
-  <!-- Form -->
-  <form th:action="@{/users/save}"
+  <form th:action="@{/users/update/{id}(id=${user.userId})}"
         th:object="${user}"
         method="post"
-        id="createUserForm">
+        id="editUserForm"
+        novalidate>
 
-    <!-- Hidden fields if needed -->
-    <input type="hidden" th:field="*{userId}" th:value="${user.userId}" />
+    <input type="hidden" th:field="*{userId}" />
+    <!-- Disabled fields are not submitted; keep email via hidden field -->
+    <input type="hidden" th:field="*{email}" id="emailHidden" />
 
     <div class="form-grid">
-      <!-- User Name -->
       <div class="field-group">
-        <label>
-          <i class="fas fa-user"></i>
-          User Name <span class="required">*</span>
-        </label>
-        <input type="text"
-               th:field="*{userName}"
-               placeholder="e.g. Developer"
-               required />
-
-        <span class="error-message" th:if="${#fields.hasErrors('userName')}">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span th:errors="*{userName}">Error message</span>
-                </span>
+        <label><i class="fas fa-user"></i> User Name <span class="required">*</span></label>
+        <input type="text" id="userName" th:field="*{userName}" placeholder="e.g. Developer" />
+        <span class="error-message" id="err-userName" th:classappend="${#fields.hasErrors('userName')} ? ' server' : ''">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}">User name is required</span>
+          <span th:unless="${#fields.hasErrors('userName')}" class="js-msg">User name is required</span>
+        </span>
       </div>
 
-      <!-- Email -->
       <div class="field-group">
-        <label>
-          <i class="fas fa-envelope"></i>
-          Email <span class="required">*</span>
-        </label>
-        <input type="email" th:disabled="${user.userId != null}"
-               th:field="*{email}"
-               placeholder="developer@localmail.com"
-               required />
-
-        <span class="error-message" th:if="${#fields.hasErrors('email')}">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span th:errors="*{email}">Error message</span>
-                </span>
+        <label><i class="fas fa-envelope"></i> Email <span class="required">*</span></label>
+        <input type="email" id="emailDisplay" th:value="*{email}" disabled />
+        <span class="error-message" id="err-email" th:classappend="${#fields.hasErrors('email')} ? ' server' : ''">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email is required</span>
+          <span th:unless="${#fields.hasErrors('email')}" class="js-msg">Email is required</span>
+        </span>
       </div>
 
-      <!-- Mobile No -->
       <div class="field-group">
-        <label>
-          <i class="fas fa-phone"></i>
-          Mobile No
-        </label>
-        <input type="tel"
-               th:field="*{mobileNo}"
-               placeholder="+91 1111111111" />
-
-        <span class="error-message" th:if="${#fields.hasErrors('mobileNo')}">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span th:errors="*{mobileNo}">Error message</span>
-                </span>
+        <label><i class="fas fa-phone"></i> Mobile No</label>
+        <input type="tel" id="mobileNo" th:field="*{mobileNo}" placeholder="+91 1111111111" maxlength="15" />
+        <span class="error-message" id="err-mobileNo">
+          <i class="fas fa-exclamation-circle"></i>
+          <span class="js-msg">Enter a valid mobile number</span>
+        </span>
       </div>
-
-      <!-- Role -->
 
       <div class="field-group field-full" th:if="${user.userId != 1}">
-        <label><i class="fas fa-user-tag"></i>Role <span class="required">*</span></label>
-        <select id="f_role" th:field="*{role}" required>
+        <label><i class="fas fa-user-tag"></i> Role <span class="required">*</span></label>
+        <select id="role" th:field="*{role}">
+          <option value="">-- Select Role --</option>
           <option th:each="role : ${roleList}"
                   th:value="${role.key}"
-                  th:text="${role.value}"
-                  th:selected="${role.key == user.role}">
+                  th:text="${role.value}">
           </option>
         </select>
-        <span class="error-message" th:if="${#fields.hasErrors('role')}"><i class="fas fa-exclamation-circle"></i><span th:errors="*{role}">Error message</span></span>
+        <span class="error-message" id="err-role" th:classappend="${#fields.hasErrors('role')} ? ' server' : ''">
+          <i class="fas fa-exclamation-circle"></i>
+          <span th:if="${#fields.hasErrors('role')}" th:errors="*{role}">Role is required</span>
+          <span th:unless="${#fields.hasErrors('role')}" class="js-msg">Role is required</span>
+        </span>
       </div>
 
-      <!-- Message displayed when userId == 1 -->
-      <div class="field-group field-full"
-           th:if="${user.userId == 1}">
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.2rem; display: flex; align-items: flex-start; gap: 0.8rem;">
-          <i class="fas fa-shield-alt" style="color: #3b82f6; font-size: 1.2rem; margin-top: 0.1rem;"></i>
+      <div class="field-group field-full" th:if="${user.userId == 1}">
+        <input type="hidden" th:field="*{role}" />
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:1rem 1.2rem;display:flex;gap:0.8rem;">
+          <i class="fas fa-shield-alt" style="color:#3b82f6;"></i>
           <div>
-            <div style="font-weight: 600; color: #1e3a8a; font-size: 0.9rem;">Administrator Account</div>
-            <div style="font-size: 0.85rem; color: #3b82f6; margin-top: 0.2rem;">
+            <div style="font-weight:600;color:#1e3a8a;font-size:0.9rem;">Administrator Account</div>
+            <div style="font-size:0.85rem;color:#3b82f6;margin-top:0.2rem;">
               Role is fixed for the primary administrator and cannot be modified.
             </div>
-            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.3rem;">
-              <i class="fas fa-info-circle"></i>
+            <div style="font-size:0.75rem;color:#6b7280;margin-top:0.3rem;">
               Current role: <strong th:text="${user.role}">ADMIN</strong>
             </div>
           </div>
         </div>
       </div>
-
-
     </div>
 
-    <!-- Actions -->
     <div class="form-actions">
       <button type="button" class="btn btn-back" id="backButton">
-        <i class="fas fa-arrow-left"></i>
-        <span class="btn-text">Back</span>
-        <span class="spinner"></span>
+        <i class="fas fa-arrow-left"></i> Back
       </button>
-      <button type="reset" class="btn btn-secondary">
-        <i class="fas fa-undo"></i>
-        Reset
+      <button type="reset" class="btn btn-secondary" id="resetBtn">
+        <i class="fas fa-undo"></i> Reset
       </button>
-
-      <button type="submit" class="btn btn-primary">
-        <i class="fas fa-save"></i>
-        Save User
+      <button type="submit" class="btn btn-primary" id="submitBtn">
+        <i class="fas fa-save"></i> Save User
       </button>
     </div>
   </form>
-
 </div>
 
-<!-- Script for dynamic behavior -->
 <script>
-    // Add/remove error class on focus
-    document.querySelectorAll('input, select').forEach(function(element) {
-        element.addEventListener('focus', function() {
-            this.classList.remove('error');
+(function () {
+    const form = document.getElementById('editUserForm');
+    if (!form) return;
+
+    const userName = document.getElementById('userName');
+    const mobileNo = document.getElementById('mobileNo');
+    const role = document.getElementById('role');
+
+    function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const err = document.getElementById('err-' + fieldId);
+        if (field) field.classList.add('error');
+        if (err) {
+            const msg = err.querySelector('.js-msg');
+            if (msg && message) msg.textContent = message;
+            err.classList.add('show');
+        }
+    }
+
+    function clearError(fieldId) {
+        const field = document.getElementById(fieldId);
+        const err = document.getElementById('err-' + fieldId);
+        if (field) field.classList.remove('error');
+        if (err && !err.classList.contains('server')) err.classList.remove('show');
+    }
+
+    function isValidMobile(value) {
+        if (!value || !value.trim()) return true; // optional
+        const digits = value.replace(/\D/g, '');
+        return digits.length >= 10 && digits.length <= 15;
+    }
+
+    function validateForm() {
+        let valid = true;
+
+        clearError('userName');
+        clearError('mobileNo');
+        if (role) clearError('role');
+
+        if (!userName.value || !userName.value.trim()) {
+            showError('userName', 'User name is required');
+            valid = false;
+        } else if (userName.value.trim().length > 100) {
+            showError('userName', 'User name cannot exceed 100 characters');
+            valid = false;
+        }
+
+        if (mobileNo.value && !isValidMobile(mobileNo.value)) {
+            showError('mobileNo', 'Enter a valid mobile number (10-15 digits)');
+            valid = false;
+        }
+
+        if (role && (!role.value || role.value.trim() === '')) {
+            showError('role', 'Role is required');
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    form.addEventListener('submit', function (e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            e.stopPropagation();
+            const firstError = form.querySelector('.error');
+            if (firstError) firstError.focus();
+            return false;
+        }
+    });
+
+    [userName, mobileNo, role].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener('input', function () {
+            clearError(el.id === 'f_role' ? 'role' : el.id);
+            if (el.id === 'role' || el.name === 'role') clearError('role');
+        });
+        el.addEventListener('change', function () {
+            clearError(el.id || 'role');
         });
     });
- document.getElementById('backButton')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.history.back();
-    });
-</script>
 
+    document.getElementById('backButton')?.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.href = '/users';
+    });
+
+    document.getElementById('resetBtn')?.addEventListener('click', function () {
+        setTimeout(function () {
+            ['userName', 'mobileNo', 'role'].forEach(clearError);
+        }, 0);
+    });
+})();
+</script>
 </body>
 </html>

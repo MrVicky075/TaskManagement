@@ -23,6 +23,7 @@ public class TaskMapper {
         TaskDTO dto = new TaskDTO();
         dto.setTaskId(entity.getTaskId());
         dto.setPriority(entity.getPriority());
+        dto.setPaid(entity.getPaid() != null ? entity.getPaid() : "Paid");
         dto.setClientName(entity.getClientName());
         dto.setIssue(entity.getIssue());
         dto.setRedmineId(entity.getRedmineId());
@@ -40,9 +41,11 @@ public class TaskMapper {
         if (entity.getAssignedUser() != null) {
             dto.setAssignUserId(entity.getAssignedUser().getUserId());
             dto.setAssignUserName(entity.getAssignedUser().getUserName());
+            dto.setAssignUserRole(entity.getAssignedUser().getRole());
         } else {
             dto.setAssignUserId(null);
             dto.setAssignUserName(null);
+            dto.setAssignUserRole(null);
         }
         return dto;
     }
@@ -53,6 +56,7 @@ public class TaskMapper {
         TaskEntity entity = new TaskEntity();
         entity.setTaskId(dto.getTaskId());
         entity.setPriority(dto.getPriority());
+        entity.setPaid(dto.getPaid() != null && !dto.getPaid().isBlank() ? dto.getPaid() : "Paid");
         entity.setClientName(dto.getClientName());
         entity.setIssue(dto.getIssue());
         entity.setRedmineId(dto.getRedmineId());
@@ -79,6 +83,7 @@ public class TaskMapper {
     public void updateTaskEntity(TaskDTO dto, TaskEntity entity) {
         if (dto == null || entity == null) {return;}
         entity.setPriority(dto.getPriority());
+        entity.setPaid(dto.getPaid() != null && !dto.getPaid().isBlank() ? dto.getPaid() : "Paid");
         entity.setClientName(dto.getClientName());
         entity.setIssue(dto.getIssue());
         entity.setRedmineId(dto.getRedmineId());

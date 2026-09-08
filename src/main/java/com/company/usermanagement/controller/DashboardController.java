@@ -6,6 +6,7 @@ import com.company.usermanagement.dto.TaskDTO;
 import com.company.usermanagement.service.TaskService;
 import com.company.usermanagement.service.UserService;
 import com.company.usermanagement.session.UserLoginSession;
+import com.company.usermanagement.utility.TaskPermissionHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,7 @@ public class DashboardController {
     private final UserService userService;
     private final UserLoginSession userLoginSession;
     private final TaskService taskService;
+    private final TaskPermissionHelper taskPermissionHelper;
     @GetMapping
     public String dashboard(
             @RequestParam(value = "client", required = false, defaultValue = "all") String client,
@@ -47,6 +49,7 @@ public class DashboardController {
 
         // filter data
         List<TaskDTO> tasks = taskService.getFilteredTasks(client, assignedTo, issueType, priority,status,fixedOn, dateFrom, dateTo);
+        taskPermissionHelper.applyCanEdit(tasks, userLoginSession);
         model.addAttribute("selectedClient", client);
         model.addAttribute("tasksList",tasks);
         model.addAttribute("selectedAssigned", assignedTo);

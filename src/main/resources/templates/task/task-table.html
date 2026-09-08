@@ -435,7 +435,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.875rem;
-            min-width: 1450px;
+            min-width: 1600px;
             table-layout: auto;
         }
 
@@ -510,10 +510,15 @@
         .badge-status-CLOSED { background: #e5e7eb; color: #4b5563; border-color: #d1d5db; }
 
         .badge-priority-P1 { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
-        .badge-priority-P2 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-        .badge-priority-P3 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
-        .badge-priority-P4 { background: #e5e7eb; color: #4b5563; border-color: #d1d5db; }
-        .badge-priority-P5 { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+        .badge-priority-P2 { background: #ffedd5; color: #c2410c; border-color: #fed7aa; }
+        .badge-priority-P3 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .badge-priority-P4 { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .badge-priority-P5 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+        .badge-priority-P6 { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+        .badge-priority-HOLD { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+
+        .badge-paid-Paid { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-paid-UnPaid { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
 
         .badge-fixedOn-LOCAL { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
         .badge-fixedOn-UAT { background: #fef3c7; color: #92400e; border-color: #fde68a; }
@@ -700,7 +705,7 @@
                 font-size: 0.65rem;
             }
             .table {
-                min-width: 1100px;
+                min-width: 1250px;
             }
             .action-btn {
                 padding: 0.15rem 0.3rem;
@@ -788,37 +793,14 @@
         </div>
     </div>
 
-    <!-- Search Bar -->
+    <!-- Search Bar — same sequence as table columns -->
     <div class="search-bar" id="searchBar">
+        <!-- 0 Task ID -->
         <div class="search-group">
             <label><i class="fas fa-hashtag"></i></label>
             <input type="text" id="searchTaskId" placeholder="TSK-1" onkeyup="filterTable()" />
         </div>
-        <div class="search-group ms-filter-group" data-filter-key="client">
-            <label><i class="fas fa-building"></i></label>
-            <button type="button" class="ms-filter-trigger" id="clientFilterTrigger" onclick="toggleMsFilter(event, 'client')">
-                <span class="trigger-label" id="clientFilterLabel">Client</span>
-                <i class="fas fa-caret-down trigger-icon"></i>
-            </button>
-            <div class="ms-filter-panel" id="clientFilterPanel" onclick="event.stopPropagation()">
-                <div class="ms-filter-header">
-                    Text Filters <i class="fas fa-chevron-right"></i>
-                </div>
-                <div class="ms-filter-search">
-                    <input type="text" id="clientFilterSearch" placeholder="Search" oninput="searchMsOptions('client')" />
-                    <i class="fas fa-search"></i>
-                </div>
-                <div class="ms-filter-list" id="clientFilterList"></div>
-                <div class="ms-filter-actions">
-                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('client')">OK</button>
-                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('client')">Cancel</button>
-                </div>
-            </div>
-        </div>
-        <div class="search-group">
-            <label><i class="fas fa-file-alt"></i></label>
-            <input type="text" id="searchRequirement" placeholder="Requirement" onkeyup="filterTable()" />
-        </div>
+        <!-- 1 Assigned To (multi) -->
         <div class="search-group ms-filter-group" data-filter-key="assigned">
             <label><i class="fas fa-user"></i></label>
             <button type="button" class="ms-filter-trigger" id="assignedFilterTrigger" onclick="toggleMsFilter(event, 'assigned')">
@@ -840,29 +822,78 @@
                 </div>
             </div>
         </div>
-        <div class="search-group">
+        <!-- 2 Priority (multi) -->
+        <div class="search-group ms-filter-group" data-filter-key="priority">
             <label><i class="fas fa-flag"></i></label>
-            <select id="searchPriority" onchange="filterTable()">
-                <option value="">Priority</option>
-                <option value="P1">P1</option>
-                <option value="P2">P2</option>
-                <option value="P3">P3</option>
-                <option value="P4">P4</option>
-                <option value="P5">P5</option>
-            </select>
+            <button type="button" class="ms-filter-trigger" id="priorityFilterTrigger" onclick="toggleMsFilter(event, 'priority')">
+                <span class="trigger-label" id="priorityFilterLabel">Priority</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="priorityFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="priorityFilterSearch" placeholder="Search" oninput="searchMsOptions('priority')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="priorityFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('priority')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('priority')">Cancel</button>
+                </div>
+            </div>
         </div>
+        <!-- 3 Paid (multi) -->
+        <div class="search-group ms-filter-group" data-filter-key="paid">
+            <label><i class="fas fa-money-bill-wave"></i></label>
+            <button type="button" class="ms-filter-trigger" id="paidFilterTrigger" onclick="toggleMsFilter(event, 'paid')">
+                <span class="trigger-label" id="paidFilterLabel">Paid</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="paidFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="paidFilterSearch" placeholder="Search" oninput="searchMsOptions('paid')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="paidFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('paid')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('paid')">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <!-- 4 Client (multi) -->
+        <div class="search-group ms-filter-group" data-filter-key="client">
+            <label><i class="fas fa-building"></i></label>
+            <button type="button" class="ms-filter-trigger" id="clientFilterTrigger" onclick="toggleMsFilter(event, 'client')">
+                <span class="trigger-label" id="clientFilterLabel">Client</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="clientFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="clientFilterSearch" placeholder="Search" oninput="searchMsOptions('client')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="clientFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('client')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('client')">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <!-- 5 Redmine ID -->
         <div class="search-group">
-            <label><i class="fas fa-circle"></i></label>
-            <select id="searchStatus" onchange="filterTable()">
-                <option value="">Status</option>
-                <option value="New Task">New Task</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Working">Working</option>
-                <option value="Complete">Complete</option>
-                <option value="Hold">Hold</option>
-                <option value="-">-</option>
-            </select>
+            <label><i class="fas fa-hashtag"></i></label>
+            <input type="text" id="searchRedmineId" placeholder="Redmine ID" onkeyup="filterTable()" />
         </div>
+        <!-- 6 Issue (multi) -->
         <div class="search-group ms-filter-group" data-filter-key="issue">
             <label><i class="fas fa-tag"></i></label>
             <button type="button" class="ms-filter-trigger" id="issueFilterTrigger" onclick="toggleMsFilter(event, 'issue')">
@@ -884,16 +915,66 @@
                 </div>
             </div>
         </div>
+        <!-- 7 Requirement -->
         <div class="search-group">
-            <label><i class="fas fa-server"></i></label>
-            <select id="searchFixedOn" onchange="filterTable()">
-                <option value="">Fixed On</option>
-                <option value="LOCAL">LOCAL</option>
-                <option value="UAT">UAT</option>
-                <option value="PRODUCTION">PRODUCTION</option>
-                <option value="PROD">PROD</option>
-            </select>
+            <label><i class="fas fa-file-alt"></i></label>
+            <input type="text" id="searchRequirement" placeholder="Requirement" onkeyup="filterTable()" />
         </div>
+        <!-- 8 Task Details -->
+        <div class="search-group">
+            <label><i class="fas fa-list-check"></i></label>
+            <input type="text" id="searchTaskDetails" placeholder="Task Details" onkeyup="filterTable()" />
+        </div>
+        <!-- 9 Remarks -->
+        <div class="search-group">
+            <label><i class="fas fa-comment"></i></label>
+            <input type="text" id="searchRemarks" placeholder="Remarks" onkeyup="filterTable()" />
+        </div>
+        <!-- 10 Status (multi) -->
+        <div class="search-group ms-filter-group" data-filter-key="status">
+            <label><i class="fas fa-circle"></i></label>
+            <button type="button" class="ms-filter-trigger" id="statusFilterTrigger" onclick="toggleMsFilter(event, 'status')">
+                <span class="trigger-label" id="statusFilterLabel">Status</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="statusFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="statusFilterSearch" placeholder="Search" oninput="searchMsOptions('status')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="statusFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('status')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('status')">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <!-- 11 Fixed On (multi) -->
+        <div class="search-group ms-filter-group" data-filter-key="fixedOn">
+            <label><i class="fas fa-server"></i></label>
+            <button type="button" class="ms-filter-trigger" id="fixedOnFilterTrigger" onclick="toggleMsFilter(event, 'fixedOn')">
+                <span class="trigger-label" id="fixedOnFilterLabel">Fixed On</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="fixedOnFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="fixedOnFilterSearch" placeholder="Search" oninput="searchMsOptions('fixedOn')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="fixedOnFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('fixedOn')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('fixedOn')">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <!-- 13 Updated -->
         <div class="search-group date-range">
             <label><i class="fas fa-calendar-alt"></i></label>
             <input type="date" id="searchDateFrom" placeholder="From" onchange="filterTable()" title="Date From" />
@@ -921,33 +1002,42 @@
                     Task ID <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(1)">
-                    Client <span class="sort-icon"><i class="fas fa-sort"></i></span>
-                </th>
-                <th onclick="sortTable(2)">
-                    Requirement <span class="sort-icon"><i class="fas fa-sort"></i></span>
-                </th>
-                <th onclick="sortTable(3)">
-                    Remarks <span class="sort-icon"><i class="fas fa-sort"></i></span>
-                </th>
-                <th onclick="sortTable(4)">
                     Assigned To <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
-                <th onclick="sortTable(5)">
+                <th onclick="sortTable(2)">
                     Priority <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
-                <th onclick="sortTable(6)">
-                    Status <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                <th onclick="sortTable(3)">
+                    Paid <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
-                <th onclick="sortTable(7)">
+                <th onclick="sortTable(4)">
+                    Client <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(5)">
+                    Redmine ID <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(6)">
                     Issue <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
+                <th onclick="sortTable(7)">
+                    Requirement <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
                 <th onclick="sortTable(8)">
-                    Fixed On <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Task Details <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(9)">
-                    Days <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Remarks <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(10)">
+                    Status <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(11)">
+                    Fixed On <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(12)">
+                    Days <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(13)">
                     Updated <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th>Actions</th>
@@ -960,23 +1050,42 @@
                 <td>
                     <span style="font-weight:600; color:#0b1a33;" th:text="'TSK-' + ${task.taskId}">TSK-1</span>
                 </td>
+                <td th:text="${task.assignUserName} ?: 'Unassigned'">User</td>
+                <td th:with="prioDisplay=${task.priority == null or task.priority == '-' ? 'HOLD' : task.priority}">
+                    <span class="badge" th:classappend="'badge-priority-' + ${prioDisplay}"
+                          th:text="${prioDisplay}">P1</span>
+                </td>
+                <td th:with="paidDisplay=${task.paid != null ? task.paid : 'Paid'}">
+                    <span class="badge" th:classappend="'badge-paid-' + ${paidDisplay}"
+                          th:text="${paidDisplay}">Paid</span>
+                </td>
                 <td th:text="${task.clientName}">Client Name</td>
+               <!-- <td th:text="${task.redmineId != null and task.redmineId != 0 ? task.redmineId : '-'}">521420</td>-->
+
+                <td>
+                    <span th:if="${task.redmineId != null and task.redmineId != 0}">
+                        <a th:href="'http://192.168.100.61:4300/redmine/issues/' + ${task.redmineId}"
+                           target="_blank"
+                           style="color: #0b5e9e; text-decoration: none; font-weight: 500;"
+                           th:text="${task.redmineId}">521420</a>
+                    </span>
+                    <span th:unless="${task.redmineId != null and task.redmineId != 0}">-</span>
+                </td>
+
+                <td th:text="${task.issue} ?: '-'">Bug</td>
                 <td>
                     <span class="text-truncate" th:text="${task.requirement} ?: '-'" th:title="${task.requirement} ?: '-'">Requirement</span>
                 </td>
                 <td>
-                    <span class="text-truncate" th:text="${task.remarks} ?: '-'" th:title="${task.remarks} ?: '-'">Remarks</span>
+                    <span class="text-truncate" th:text="${task.taskDetails} ?: '-'" th:title="${task.taskDetails} ?: '-'">Task Details</span>
                 </td>
-                <td th:text="${task.assignUserName} ?: 'Unassigned'">User</td>
                 <td>
-                    <span class="badge" th:classappend="'badge-priority-' + ${task.priority}"
-                          th:text="${task.priority} ?: '-'">P1</span>
+                    <span class="text-truncate" th:text="${task.remarks} ?: '-'" th:title="${task.remarks} ?: '-'">Remarks</span>
                 </td>
                 <td>
                     <span class="badge" th:classappend="'badge-status-' + ${task.status}"
                           th:text="${task.status} ?: '-'">NEW</span>
                 </td>
-                <td th:text="${task.issue} ?: '-'">Bug</td>
                 <td>
                     <span class="badge" th:classappend="'badge-fixedOn-' + ${task.fixedOn}"
                           th:text="${task.fixedOn} ?: '-'">LOCAL</span>
@@ -985,7 +1094,10 @@
                 <td th:text="${task.updateAt != null ? #temporals.format(task.updateAt, 'dd MMM yyyy HH:mm') : '-'}">01 Jan 2024</td>
                 <td>
                     <div class="action-group">
-                        <a th:href="@{/tasks/editTask/{id}(id=${task.taskId})}" class="action-btn action-btn-edit" title="Edit Task">
+                        <a th:if="${task.canEdit}"
+                           th:href="@{/tasks/editTask/{id}(id=${task.taskId})}"
+                           class="action-btn action-btn-edit"
+                           title="Edit Task">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         <div th:if="${allowDelete == true}">
@@ -1005,7 +1117,7 @@
             </tr>
             <!-- Empty state -->
             <tr th:if="${#lists.isEmpty(tasksList)}" id="emptyState">
-                <td colspan="12" style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                <td colspan="15" style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
                     <i class="fas fa-tasks" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.3;"></i>
                     No tasks found. Click "Add Task" to create one.
                 </td>
@@ -1039,11 +1151,17 @@
     const rowsPerPage = 15;
     let filteredRows = [];
 
-    // ===== MULTI-SELECT FILTERS (Client / Assigned / Issue) =====
+    // ===== MULTI-SELECT FILTERS (same sequence as table) =====
+    // 0 Task ID | 1 Assigned To | 2 Priority | 3 Paid | 4 Client | 5 Redmine ID | 6 Issue
+    // 7 Requirement | 8 Task Details | 9 Remarks | 10 Status | 11 Fixed On | 12 Days | 13 Updated | 14 Actions
     const msFilters = {
-        client:   { selected: null, col: 1, placeholder: 'Client' },
-        assigned: { selected: null, col: 4, placeholder: 'Assigned To' },
-        issue:    { selected: null, col: 7, placeholder: 'Issue' }
+        assigned: { selected: null, col: 1, placeholder: 'Assigned To' },
+        priority: { selected: null, col: 2, placeholder: 'Priority' },
+        paid:     { selected: null, col: 3, placeholder: 'Paid' },
+        client:   { selected: null, col: 4, placeholder: 'Client' },
+        issue:    { selected: null, col: 6, placeholder: 'Issue' },
+        status:   { selected: null, col: 10, placeholder: 'Status' },
+        fixedOn:  { selected: null, col: 11, placeholder: 'Fixed On' }
     };
 
     // Add title attribute to all truncated text elements for tooltips
@@ -1251,10 +1369,10 @@
     // ===== FILTER FUNCTION =====
     function filterTable() {
         const taskIdFilter = document.getElementById('searchTaskId').value.toLowerCase();
+        const redmineIdFilter = document.getElementById('searchRedmineId').value.toLowerCase();
         const requirementFilter = document.getElementById('searchRequirement').value.toLowerCase();
-        const priorityFilter = document.getElementById('searchPriority').value;
-        const statusFilter = document.getElementById('searchStatus').value;
-        const fixedOnFilter = document.getElementById('searchFixedOn').value;
+        const taskDetailsFilter = document.getElementById('searchTaskDetails').value.toLowerCase();
+        const remarksFilter = document.getElementById('searchRemarks').value.toLowerCase();
         const dateFrom = document.getElementById('searchDateFrom').value;
         const dateTo = document.getElementById('searchDateTo').value;
 
@@ -1271,49 +1389,69 @@
 
         filteredRows = [];
         let visibleCount = 0;
-        const clientSet = msFilters.client.selected ? new Set(msFilters.client.selected) : null;
         const assignedSet = msFilters.assigned.selected ? new Set(msFilters.assigned.selected) : null;
+        const prioritySet = msFilters.priority.selected ? new Set(msFilters.priority.selected) : null;
+        const paidSet = msFilters.paid.selected ? new Set(msFilters.paid.selected) : null;
+        const clientSet = msFilters.client.selected ? new Set(msFilters.client.selected) : null;
         const issueSet = msFilters.issue.selected ? new Set(msFilters.issue.selected) : null;
+        const statusSet = msFilters.status.selected ? new Set(msFilters.status.selected) : null;
+        const fixedOnSet = msFilters.fixedOn.selected ? new Set(msFilters.fixedOn.selected) : null;
 
         dataRows.forEach(row => {
             const cells = row.querySelectorAll('td');
             let match = true;
 
+            // 0 Task ID
             if (taskIdFilter && !cells[0].textContent.toLowerCase().includes(taskIdFilter)) {
                 match = false;
             }
-            if (match && clientSet && !clientSet.has(cells[1].textContent.trim())) {
+            // 1 Assigned To (multi)
+            if (match && assignedSet && !assignedSet.has(cells[1].textContent.trim())) {
                 match = false;
             }
-            if (match && requirementFilter && !cells[2].textContent.toLowerCase().includes(requirementFilter)) {
+            // 2 Priority (multi)
+            if (match && prioritySet && !prioritySet.has(cells[2].textContent.trim())) {
                 match = false;
             }
-            if (match && assignedSet && !assignedSet.has(cells[4].textContent.trim())) {
+            // 3 Paid (multi)
+            if (match && paidSet && !paidSet.has(cells[3].textContent.trim())) {
                 match = false;
             }
-            if (match && priorityFilter) {
-                const priorityBadge = cells[5].querySelector('.badge');
-                if (!priorityBadge || !priorityBadge.textContent.includes(priorityFilter)) {
-                    match = false;
-                }
-            }
-            if (match && statusFilter) {
-                const statusBadge = cells[6].querySelector('.badge');
-                if (!statusBadge || !statusBadge.textContent.toLowerCase().includes(statusFilter.toLowerCase())) {
-                    match = false;
-                }
-            }
-            if (match && issueSet && !issueSet.has(cells[7].textContent.trim())) {
+            // 4 Client (multi)
+            if (match && clientSet && !clientSet.has(cells[4].textContent.trim())) {
                 match = false;
             }
-            if (match && fixedOnFilter) {
-                const fixedOnBadge = cells[8].querySelector('.badge');
-                if (!fixedOnBadge || !fixedOnBadge.textContent.includes(fixedOnFilter)) {
-                    match = false;
-                }
+            // 5 Redmine ID
+            if (match && redmineIdFilter && !cells[5].textContent.toLowerCase().includes(redmineIdFilter)) {
+                match = false;
             }
+            // 6 Issue (multi)
+            if (match && issueSet && !issueSet.has(cells[6].textContent.trim())) {
+                match = false;
+            }
+            // 7 Requirement
+            if (match && requirementFilter && !cells[7].textContent.toLowerCase().includes(requirementFilter)) {
+                match = false;
+            }
+            // 8 Task Details
+            if (match && taskDetailsFilter && !cells[8].textContent.toLowerCase().includes(taskDetailsFilter)) {
+                match = false;
+            }
+            // 9 Remarks
+            if (match && remarksFilter && !cells[9].textContent.toLowerCase().includes(remarksFilter)) {
+                match = false;
+            }
+            // 10 Status (multi)
+            if (match && statusSet && !statusSet.has(cells[10].textContent.trim())) {
+                match = false;
+            }
+            // 11 Fixed On (multi)
+            if (match && fixedOnSet && !fixedOnSet.has(cells[11].textContent.trim())) {
+                match = false;
+            }
+            // 13 Updated
             if (match && (dateFrom || dateTo)) {
-                const dateStr = cells[10].textContent.trim();
+                const dateStr = cells[13].textContent.trim();
                 if (dateStr) {
                     const dateObj = new Date(dateStr);
                     if (dateFrom) {
@@ -1467,55 +1605,81 @@
             const cellsB = b.querySelectorAll('td');
 
             switch(columnIndex) {
-                case 0:
+                case 0: // Task ID
                     aVal = parseInt(cellsA[0].textContent.replace('TSK-', ''));
                     bVal = parseInt(cellsB[0].textContent.replace('TSK-', ''));
                     break;
-                case 1:
+                case 1: // Assigned To
                     aVal = cellsA[1].textContent.trim().toLowerCase();
                     bVal = cellsB[1].textContent.trim().toLowerCase();
                     break;
-                case 2:
-                    aVal = cellsA[2].textContent.trim().toLowerCase();
-                    bVal = cellsB[2].textContent.trim().toLowerCase();
+                case 2: // Priority
+                    {
+                        const aBadge = cellsA[2].querySelector('.badge');
+                        const bBadge = cellsB[2].querySelector('.badge');
+                        aVal = aBadge ? aBadge.textContent.trim() : '';
+                        bVal = bBadge ? bBadge.textContent.trim() : '';
+                    }
                     break;
-                case 3:
-                    aVal = cellsA[3].textContent.trim().toLowerCase();
-                    bVal = cellsB[3].textContent.trim().toLowerCase();
+                case 3: // Paid
+                    {
+                        const aPaid = cellsA[3].querySelector('.badge');
+                        const bPaid = cellsB[3].querySelector('.badge');
+                        aVal = aPaid ? aPaid.textContent.trim() : '';
+                        bVal = bPaid ? bPaid.textContent.trim() : '';
+                    }
                     break;
-                case 4:
+                case 4: // Client
                     aVal = cellsA[4].textContent.trim().toLowerCase();
                     bVal = cellsB[4].textContent.trim().toLowerCase();
                     break;
-                case 5:
-                    const aBadge = cellsA[5].querySelector('.badge');
-                    const bBadge = cellsB[5].querySelector('.badge');
-                    aVal = aBadge ? aBadge.textContent.trim() : '';
-                    bVal = bBadge ? bBadge.textContent.trim() : '';
+                case 5: // Redmine ID
+                    {
+                        const aRed = cellsA[5].textContent.trim();
+                        const bRed = cellsB[5].textContent.trim();
+                        aVal = aRed === '-' ? 0 : (parseInt(aRed) || 0);
+                        bVal = bRed === '-' ? 0 : (parseInt(bRed) || 0);
+                    }
                     break;
-                case 6:
-                    const aStatus = cellsA[6].querySelector('.badge');
-                    const bStatus = cellsB[6].querySelector('.badge');
-                    aVal = aStatus ? aStatus.textContent.trim() : '';
-                    bVal = bStatus ? bStatus.textContent.trim() : '';
+                case 6: // Issue
+                    aVal = cellsA[6].textContent.trim().toLowerCase();
+                    bVal = cellsB[6].textContent.trim().toLowerCase();
                     break;
-                case 7:
+                case 7: // Requirement
                     aVal = cellsA[7].textContent.trim().toLowerCase();
                     bVal = cellsB[7].textContent.trim().toLowerCase();
                     break;
-                case 8:
-                    const aFixed = cellsA[8].querySelector('.badge');
-                    const bFixed = cellsB[8].querySelector('.badge');
-                    aVal = aFixed ? aFixed.textContent.trim() : '';
-                    bVal = bFixed ? bFixed.textContent.trim() : '';
+                case 8: // Task Details
+                    aVal = cellsA[8].textContent.trim().toLowerCase();
+                    bVal = cellsB[8].textContent.trim().toLowerCase();
                     break;
-                case 9:
-                    aVal = parseInt(cellsA[9].textContent.trim()) || 0;
-                    bVal = parseInt(cellsB[9].textContent.trim()) || 0;
+                case 9: // Remarks
+                    aVal = cellsA[9].textContent.trim().toLowerCase();
+                    bVal = cellsB[9].textContent.trim().toLowerCase();
                     break;
-                case 10:
-                    aVal = new Date(cellsA[10].textContent.trim());
-                    bVal = new Date(cellsB[10].textContent.trim());
+                case 10: // Status
+                    {
+                        const aStatus = cellsA[10].querySelector('.badge');
+                        const bStatus = cellsB[10].querySelector('.badge');
+                        aVal = aStatus ? aStatus.textContent.trim() : '';
+                        bVal = bStatus ? bStatus.textContent.trim() : '';
+                    }
+                    break;
+                case 11: // Fixed On
+                    {
+                        const aFixed = cellsA[11].querySelector('.badge');
+                        const bFixed = cellsB[11].querySelector('.badge');
+                        aVal = aFixed ? aFixed.textContent.trim() : '';
+                        bVal = bFixed ? bFixed.textContent.trim() : '';
+                    }
+                    break;
+                case 12: // Days
+                    aVal = parseInt(cellsA[12].textContent.trim()) || 0;
+                    bVal = parseInt(cellsB[12].textContent.trim()) || 0;
+                    break;
+                case 13: // Updated
+                    aVal = new Date(cellsA[13].textContent.trim());
+                    bVal = new Date(cellsB[13].textContent.trim());
                     break;
                 default:
                     aVal = a.textContent.trim().toLowerCase();
@@ -1533,10 +1697,10 @@
 
     function clearFilters() {
         document.getElementById('searchTaskId').value = '';
+        document.getElementById('searchRedmineId').value = '';
         document.getElementById('searchRequirement').value = '';
-        document.getElementById('searchPriority').value = '';
-        document.getElementById('searchStatus').value = '';
-        document.getElementById('searchFixedOn').value = '';
+        document.getElementById('searchTaskDetails').value = '';
+        document.getElementById('searchRemarks').value = '';
         document.getElementById('searchDateFrom').value = '';
         document.getElementById('searchDateTo').value = '';
         resetAllMsFilters();

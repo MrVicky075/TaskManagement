@@ -13,6 +13,8 @@ import com.company.usermanagement.mapper.UserMapper;
 import com.company.usermanagement.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +25,18 @@ import java.util.Map;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private final MailService mailService;
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public UserResponseDTO createUser(UserRequestDTO request) {
-        if(userRepository.existsByEmail(request.getEmail())){
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException("Email already registered");
         }
         UserEntity entity = mapper.toEntity(request);
@@ -41,6 +46,14 @@ public class UserServiceImpl implements UserService{
         entity.setUpdatedOn(LocalDateTime.now());
 
         UserEntity saved = userRepository.save(entity);
+        log.info("User registration completed for userId={}", saved.getUserId());
+
+        try {
+            mailService.sendUserRegistrationEmail(saved);
+        } catch (Exception ex) {
+            log.error("User id={} saved but registration email failed", saved.getUserId(), ex);
+        }
+
         auditService.log(
                 AuditAction.CREATE,
                 AuditEntityType.USER,
@@ -54,18 +67,26 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserResponseDTO updateUser(Long userId, UserResponseDTO request) {
-        UserEntity entity = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User not found: " + userId));
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         Map<String, Object> before = AuditSnapshotUtil.userSnapshot(entity);
 
-        if(!entity.getEmail().equalsIgnoreCase(request.getEmail())){
-            if(userRepository.existsByEmail(request.getEmail())){
+        if (!entity.getEmail().equalsIgnoreCase(request.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
                 throw new BusinessException("Email already registered");
             }
         }
-        mapper.updateEntity(entity,request);
+        mapper.updateEntity(entity, request);
         entity.setUpdatedOn(LocalDateTime.now());
         UserEntity saved = userRepository.save(entity);
         Map<String, Object> after = AuditSnapshotUtil.userSnapshot(saved);
+        log.info("User update completed for userId={}", saved.getUserId());
+
+        try {
+            mailService.sendUserUpdatedEmail(before, saved);
+        } catch (Exception ex) {
+            log.error("User id={} updated but notification email failed", saved.getUserId(), ex);
+        }
 
         auditService.log(
                 AuditAction.UPDATE,
@@ -80,7 +101,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteUser(Long userId) {
-        UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found" + userId));
         Map<String, Object> before = AuditSnapshotUtil.userSnapshot(entity);
         userRepository.deleteById(userId);
         auditService.log(
@@ -95,7 +117,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserResponseDTO getUserById(Long userId) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found" + userId));
         return mapper.toResponse(user);
     }
 
@@ -114,7 +137,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void changeActiveStatus(Long userId) {
-        UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found" + userId));
         Boolean oldStatus = entity.getIsActive();
         entity.setIsActive(!Boolean.TRUE.equals(entity.getIsActive()));
         entity.setUpdatedOn(LocalDateTime.now());
@@ -132,12 +156,13 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void changePassword(Long userId, ChangePasswordDTO request) {
-        UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
-        if(request.getMode().equalsIgnoreCase("user")){
-            if(!passwordEncoder.matches(request.getOldPassword(),entity.getPassword())){
+        UserEntity entity = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found" + userId));
+        if (request.getMode().equalsIgnoreCase("user")) {
+            if (!passwordEncoder.matches(request.getOldPassword(), entity.getPassword())) {
                 throw new BusinessException("Old password is incorrect");
             }
-            if(!passwordEncoder.matches(request.getOldPassword(),request.getConfirmPassword())){
+            if (!passwordEncoder.matches(request.getOldPassword(), request.getConfirmPassword())) {
                 throw new BusinessException("New password and confirm password do not match");
             }
         }
@@ -157,7 +182,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserEntity getEntityByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("User Not found"));
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User Not found"));
     }
 
     public UserEntity findByUserName(String username) {

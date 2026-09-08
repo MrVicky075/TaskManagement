@@ -33,6 +33,16 @@ public final class AppConstants {
         map.put("P3","P3");
         map.put("P4","P4");
         map.put("P5","P5");
+        map.put("P6","P6");
+        map.put("HOLD","HOLD");
+        return map;
+    }
+
+    // Paid status
+    public static Map<String, String> getPaidList() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("Paid", "Paid");
+        map.put("UnPaid", "UnPaid");
         return map;
     }
 

@@ -62,6 +62,7 @@ public final class AuditSnapshotUtil {
         map.put("taskDetails", entity.getTaskDetails());
         map.put("remarks", entity.getRemarks());
         map.put("priority", entity.getPriority());
+        map.put("paid", entity.getPaid());
         map.put("status", entity.getStatus());
         map.put("issue", entity.getIssue());
         map.put("fixedOn", entity.getFixedOn());
@@ -89,6 +90,7 @@ public final class AuditSnapshotUtil {
         map.put("taskDetails", dto.getTaskDetails());
         map.put("remarks", dto.getRemarks());
         map.put("priority", dto.getPriority());
+        map.put("paid", dto.getPaid());
         map.put("status", dto.getStatus());
         map.put("issue", dto.getIssue());
         map.put("fixedOn", dto.getFixedOn());
