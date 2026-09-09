@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted Tasks · TaskFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f4f7fc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .card { background: #fff; padding: 1.5rem 2rem; min-height: 100vh; width: 100%; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1.5rem; font-weight: 600; color: #0b1a33; display: flex; align-items: center; gap: 0.5rem; }
+        .card-title i { color: #dc2626; }
+        .card-title small { font-size: 0.875rem; font-weight: 400; color: #5e6f8d; margin-left: 0.5rem; }
+        .btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.2rem; background: #f7faff; color: #2a436e; border: 1px solid #ccd7e9; border-radius: 10px; text-decoration: none; font-size: 0.875rem; }
+        .btn-back:hover { background: #edf4ff; }
+        .table-responsive { overflow-x: auto; border-radius: 16px; border: 1px solid #e9edf4; background: #fff; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 1200px; }
+        .table thead th { background: #f8faff; color: #1a2c4a; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; padding: 0.75rem; border-bottom: 2px solid #d7e0ec; text-align: left; white-space: nowrap; }
+        .table tbody td { padding: 0.6rem 0.7rem; border-bottom: 1px solid #eef2f8; vertical-align: middle; color: #1e2f4a; }
+        .table tbody tr:hover td { background: #fafcff; }
+        .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 50px; font-size: 0.65rem; font-weight: 600; border: 1px solid transparent; }
+        .badge-priority-P1 { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .badge-priority-P2 { background: #ffedd5; color: #c2410c; border-color: #fed7aa; }
+        .badge-priority-P3 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .badge-priority-P4 { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .badge-priority-P5 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+        .badge-priority-P6 { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+        .badge-priority-HOLD { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+        .badge-paid-Paid { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-paid-UnPaid { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .truncate { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
+        .empty { text-align: center; padding: 3rem 1rem; color: #6b7280; }
+        .rollback-btn {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.35rem 0.8rem; border-radius: 6px; border: 1px solid #86efac;
+            background: #ecfdf5; color: #166534; font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+        .rollback-btn:hover { background: #d1fae5; border-color: #22c55e; }
+        @media (max-width: 768px) { .card { padding: 1rem; } }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">
+            <i class="fas fa-trash-restore"></i>
+            Deleted Tasks
+            <small th:text="'· ' + ${#lists.size(tasksList)} + ' records'">· 0 records</small>
+        </h4>
+        <a th:href="@{/dashboard}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Task ID</th>
+                <th>Assigned To</th>
+                <th>Priority</th>
+                <th>Paid</th>
+                <th>Client</th>
+                <th>Redmine ID</th>
+                <th>Issue</th>
+                <th>Requirement</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(tasksList)}">
+                <td colspan="11" class="empty">
+                    <i class="fas fa-trash-restore" style="font-size:2rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+                    No deleted tasks found.
+                </td>
+            </tr>
+            <tr th:each="task : ${tasksList}">
+                <td>
+                    <span style="font-weight:600;color:#0b1a33;" th:text="'TSK-' + ${task.taskId}">TSK-1</span>
+                </td>
+                <td th:text="${task.assignUserName} ?: 'Unassigned'">User</td>
+                <td th:with="prioDisplay=${task.priority == null or task.priority == '-' ? 'HOLD' : task.priority}">
+                    <span class="badge" th:classappend="'badge-priority-' + ${prioDisplay}" th:text="${prioDisplay}">P1</span>
+                </td>
+                <td th:with="paidDisplay=${task.paid != null ? task.paid : 'Paid'}">
+                    <span class="badge" th:classappend="'badge-paid-' + ${paidDisplay}" th:text="${paidDisplay}">Paid</span>
+                </td>
+                <td th:text="${task.clientName} ?: '-'">Client</td>
+                <td th:text="${task.redmineId != null and task.redmineId != 0 ? task.redmineId : '-'}">-</td>
+                <td th:text="${task.issue} ?: '-'">Issue</td>
+                <td>
+                    <span class="truncate" th:text="${task.requirement} ?: '-'" th:title="${task.requirement}">Requirement</span>
+                </td>
+                <td th:text="${task.status} ?: '-'">Status</td>
+                <td th:text="${task.updateAt != null ? #temporals.format(task.updateAt, 'dd MMM yyyy HH:mm') : '-'}">-</td>
+                <td>
+                    <form th:action="@{/tasks/rollback/{id}(id=${task.taskId})}"
+                          method="post"
+                          style="display:inline"
+                          onsubmit="return confirm('Rollback this task? It will become active again.');">
+                        <button type="submit" class="rollback-btn" title="Restore task">
+                            <i class="fas fa-undo"></i> Rollback
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

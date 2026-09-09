@@ -18,6 +18,11 @@ public interface TaskService {
         TaskDTO updateTask(Long taskId, TaskDTO taskDTO);
 
         void deleteTask(Long taskId);
+
+        List<TaskDTO> getDeletedTasks();
+
+        void restoreTask(Long taskId);
+
         List<TaskDTO> getFilteredTasks(String client, String assignedTo, String issueType, String priority, String status, String fixedOn, String dateFrom, String dateTo);
 
         List<String> getDistinctClientNames();

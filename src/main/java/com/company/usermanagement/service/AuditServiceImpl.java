@@ -32,6 +32,7 @@ public class AuditServiceImpl implements AuditService {
     private final AuditMapper auditMapper;
     private final UserLoginSession userLoginSession;
     private final ObjectMapper objectMapper;
+    private final MailSettingService mailSettingService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -41,6 +42,11 @@ public class AuditServiceImpl implements AuditService {
                     String description,
                     Object oldValue,
                     Object newValue) {
+        if (!mailSettingService.isAuditEntryEnabled()) {
+            log.info("Audit Entry is OFF - skipping audit: action={}, entityType={}, entityId={}",
+                    action, entityType, entityId);
+            return;
+        }
         try {
             AuditEntity audit = AuditEntity.builder()
                     .userId(userLoginSession.getUserId())
@@ -63,6 +69,10 @@ public class AuditServiceImpl implements AuditService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logLogin(Long userId, String userName) {
+        if (!mailSettingService.isAuditEntryEnabled()) {
+            log.info("Audit Entry is OFF - skipping login audit for userId={}", userId);
+            return;
+        }
         try {
             LocalDateTime cutoff = LocalDateTime.now().minusSeconds(5);
             if (auditRepository.existsByUserIdAndActionAndCreatedAtAfter(

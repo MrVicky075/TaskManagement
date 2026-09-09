@@ -16,7 +16,10 @@ public interface TaskRepository extends JpaRepository<TaskEntity,Long> {
     @Query("SELECT t FROM TaskEntity t WHERE t.isActive = true order by t.taskId desc")
     List<TaskEntity> getAllTask();
 
-    @Query("SELECT t FROM TaskEntity t WHERE assignedUser.userId IN :userIds order by t.taskId desc")
+    @Query("SELECT t FROM TaskEntity t WHERE t.isActive = false order by t.taskId desc")
+    List<TaskEntity> getDeletedTasks();
+
+    @Query("SELECT t FROM TaskEntity t WHERE t.assignedUser.userId IN :userIds and t.isActive = true order by t.taskId desc")
     List<TaskEntity> getMyAllTask(@Param("userIds") List<Long> userIds);
 
     @Modifying

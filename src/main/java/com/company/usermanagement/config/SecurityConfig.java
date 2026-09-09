@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/login","/css/**","/js/**","/images/**","/error").permitAll()
                         .requestMatchers("/excel/export-tasks").authenticated()
-                        .requestMatchers("/users/**","/tasks/deleteTask/**","/excel/**l", "/audit/**", "/mail/**")
+                        .requestMatchers("/users/**","/tasks/deleteTask/**","/tasks/deleted","/tasks/rollback/**","/excel/**l", "/audit/**", "/mail/**")
                                 .hasAnyRole("ADMIN","SR_DEVELOPER","SUPPORT")
                         //.requestMatchers("/dashboard").hasAnyRole("ADMIN","SR_DEVELOPER","DEVELOPER")
                         .requestMatchers("/dashboard","/tasks").authenticated()

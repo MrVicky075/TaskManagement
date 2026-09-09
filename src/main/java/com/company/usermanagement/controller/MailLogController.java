@@ -4,6 +4,7 @@ import com.company.usermanagement.constraint.MailLogStatus;
 import com.company.usermanagement.entity.MailLog;
 import com.company.usermanagement.exception.ResourceNotFoundException;
 import com.company.usermanagement.repository.MailLogRepository;
+import com.company.usermanagement.service.MailSettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,8 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,6 +31,7 @@ import java.util.List;
 public class MailLogController {
 
 	private final MailLogRepository mailLogRepository;
+	private final MailSettingService mailSettingService;
 
 	@GetMapping("/report")
 	public String mailReport(
@@ -64,7 +68,43 @@ public class MailLogController {
 		model.addAttribute("pageNumber", page);
 		model.addAttribute("pageSize", size);
 		model.addAttribute("statusOptions", statusOptions());
+		model.addAttribute("ccEnabled", mailSettingService.isCcEnabled());
+		model.addAttribute("mailSendEnabled", mailSettingService.isMailSendEnabled());
+		model.addAttribute("auditEntryEnabled", mailSettingService.isAuditEntryEnabled());
 		return "mail/mail-report";
+	}
+
+	@PostMapping("/cc-toggle")
+	public String toggleCc(
+			@RequestParam("enabled") boolean enabled,
+			RedirectAttributes redirectAttributes) {
+		boolean ccEnabled = mailSettingService.setCcEnabled(enabled);
+		redirectAttributes.addFlashAttribute("toggleMessage",
+				ccEnabled ? "Mail CC is ON. Notifications will include CC recipients."
+						: "Mail CC is OFF. Notifications will be sent To-only (no CC).");
+		return "redirect:/mail/report";
+	}
+
+	@PostMapping("/send-toggle")
+	public String toggleMailSend(
+			@RequestParam("enabled") boolean enabled,
+			RedirectAttributes redirectAttributes) {
+		boolean mailSendEnabled = mailSettingService.setMailSendEnabled(enabled);
+		redirectAttributes.addFlashAttribute("toggleMessage",
+				mailSendEnabled ? "Mail Send is ON. Notification emails will be sent."
+						: "Mail Send is OFF. Notification emails will not be sent.");
+		return "redirect:/mail/report";
+	}
+
+	@PostMapping("/audit-toggle")
+	public String toggleAuditEntry(
+			@RequestParam("enabled") boolean enabled,
+			RedirectAttributes redirectAttributes) {
+		boolean auditEntryEnabled = mailSettingService.setAuditEntryEnabled(enabled);
+		redirectAttributes.addFlashAttribute("toggleMessage",
+				auditEntryEnabled ? "Audit Entry is ON. Audit records will be inserted."
+						: "Audit Entry is OFF. Audit records will not be inserted.");
+		return "redirect:/mail/report";
 	}
 
 	@GetMapping("/detail/{id}")

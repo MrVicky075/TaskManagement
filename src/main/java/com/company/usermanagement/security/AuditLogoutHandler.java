@@ -5,7 +5,7 @@ import com.company.usermanagement.audit.AuditEntityType;
 import com.company.usermanagement.audit.AuditSnapshotUtil;
 import com.company.usermanagement.entity.AuditEntity;
 import com.company.usermanagement.repository.AuditRepository;
-import com.company.usermanagement.security.CustomUserDetails;
+import com.company.usermanagement.service.MailSettingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,15 @@ import org.springframework.stereotype.Component;
 public class AuditLogoutHandler implements LogoutHandler {
 
     private final AuditRepository auditRepository;
+    private final MailSettingService mailSettingService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            return;
+        }
+        if (!mailSettingService.isAuditEntryEnabled()) {
+            log.info("Audit Entry is OFF - skipping logout audit");
             return;
         }
         try {

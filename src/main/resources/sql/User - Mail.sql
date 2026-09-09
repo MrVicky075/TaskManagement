@@ -28,7 +28,7 @@ VALUES
     ),
     (
     '2026-08-27 15:41:44.8073022',
-    'shubham@localmail.com',
+    'shubham.tiwari@localmail.com',
     1,
     '9923456789',
     '$2a$12$5j12Lv6z6lRA/0bIezw7suYdNO/Jf7v7PfXC9h76zWPksxsXKfaBW',

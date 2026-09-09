@@ -86,16 +86,26 @@ public class TaskController {
         return "redirect:/dashboard";
     }
 
+    @GetMapping("/deleted")
+    public String deletedTasks(Model model) {
+        List<TaskDTO> tasks = taskService.getDeletedTasks();
+        model.addAttribute("currentPage", "deletedTasks");
+        model.addAttribute("tasksList", tasks);
+        return "task/deleted-tasks";
+    }
+
+    @PostMapping("/rollback/{id}")
+    public String rollbackTask(@PathVariable Long id) {
+        taskService.restoreTask(id);
+        return "redirect:/tasks/deleted";
+    }
+
     @GetMapping("/myTask")
     public String myTask(Model model){
         boolean allowDelete = false;
         if (!userLoginSession.getRole().name().equalsIgnoreCase("developer")){
             allowDelete=true;
         }
-        System.out.println(userLoginSession);
-        System.out.println(userLoginSession.getRole());
-        System.out.println(userLoginSession.getEmail());
-        System.out.println(userLoginSession.getUserId());
         model.addAttribute("allowDelete",allowDelete);
         List<Long> userIds = new ArrayList<>();
         userIds.add(userLoginSession.getUserId());

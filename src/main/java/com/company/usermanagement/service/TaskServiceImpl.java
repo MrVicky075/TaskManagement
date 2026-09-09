@@ -169,6 +169,37 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<TaskDTO> getDeletedTasks() {
+        return mapper.toDTOList(taskRepository.getDeletedTasks());
+    }
+
+    @Override
+    @Transactional
+    public void restoreTask(Long taskId) {
+        TaskEntity existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
+        if (Boolean.TRUE.equals(existingTask.getIsActive())) {
+            throw new ResourceNotFoundException("Task is already active: " + taskId);
+        }
+
+        Map<String, Object> before = AuditSnapshotUtil.singleValueMap("isActive", false);
+        existingTask.setIsActive(true);
+        existingTask.setUpdatedBy(userLoginSession.getUserId());
+        taskRepository.save(existingTask);
+        log.info("Task restore completed for taskId={}", taskId);
+
+        auditService.log(
+                AuditAction.UPDATE,
+                AuditEntityType.TASK,
+                taskId,
+                "Restored deleted task #" + taskId,
+                before,
+                AuditSnapshotUtil.singleValueMap("isActive", true)
+        );
+    }
+
+    @Override
     public List<TaskDTO> getFilteredTasks(String client, String assignedTo, String issueType, String priority,
                                           String status, String fixedOn, String dateFrom, String dateTo) {
         Long assignedUserId = null;

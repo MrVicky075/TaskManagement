@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,10 +39,85 @@
         .page-btn.active { background: #4a7fe0; color: #fff; border-color: #4a7fe0; }
         .page-btn.disabled { opacity: 0.5; pointer-events: none; }
         .empty { text-align: center; padding: 3rem 1rem; color: #6b7280; }
+        .cc-toggle-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            margin-bottom: 0.85rem;
+            padding: 0.95rem 1.1rem;
+            background: #f8faff;
+            border: 1px solid #e9edf4;
+            border-radius: 12px;
+        }
+        .toggle-group { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.2rem; }
+        .cc-toggle-info { min-width: 0; }
+        .cc-toggle-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a2c4a;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .cc-toggle-title i { color: #4a7fe0; }
+        .cc-toggle-hint { font-size: 0.75rem; color: #5e6f8d; margin-top: 0.25rem; }
+        .cc-toggle-form { display: flex; align-items: center; gap: 0.75rem; }
+        .cc-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.65rem;
+            border-radius: 50px;
+        }
+        .cc-status.on { background: #e3f9ec; color: #1a6e4b; }
+        .cc-status.off { background: #fee2e2; color: #991b1b; }
+        .toggle-switch {
+            position: relative;
+            width: 58px;
+            height: 30px;
+            display: inline-block;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #c5d0e0;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch input:checked + .toggle-slider { background: #2b6e5b; }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(28px); }
+        .flash-ok {
+            margin-bottom: 1rem;
+            padding: 0.7rem 0.9rem;
+            background: #e3f9ec;
+            color: #1a6e4b;
+            border: 1px solid #b8edd0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
         @media (max-width: 768px) {
             .card { padding: 1rem; }
             .filter-strip { flex-direction: column; align-items: stretch; }
             .field { min-width: 100%; }
+            .cc-toggle-bar { align-items: stretch; }
+            .cc-toggle-form { justify-content: space-between; }
         }
     </style>
 </head>
@@ -59,6 +134,84 @@
         </a>
     </div>
 
+    <div class="flash-ok" th:if="${toggleMessage}" th:text="${toggleMessage}">Saved</div>
+
+    <div sec:authorize="hasAnyRole('ADMIN','SR_DEVELOPER')">
+        <div class="toggle-group" style="display: none">
+        <div class="cc-toggle-bar">
+            <div class="cc-toggle-info">
+                <div class="cc-toggle-title">
+                    <i class="fas fa-paper-plane"></i>
+                    Mail Send
+                </div>
+                <div class="cc-toggle-hint">
+                    ON = send notification emails. OFF = do not send any mail.
+                </div>
+            </div>
+            <form th:action="@{/mail/send-toggle}" method="post" class="cc-toggle-form" id="mailSendToggleForm">
+                <span class="cc-status" th:classappend="${mailSendEnabled} ? 'on' : 'off'"
+                      th:text="${mailSendEnabled} ? 'ON' : 'OFF'">ON</span>
+                <label class="toggle-switch" title="Toggle Mail Send">
+                    <input type="checkbox"
+                           id="mailSendEnabledToggle"
+                           th:checked="${mailSendEnabled}"
+                           onchange="submitMailSendToggle(this)" />
+                    <span class="toggle-slider"></span>
+                </label>
+                <input type="hidden" name="enabled" id="mailSendEnabledValue" th:value="${mailSendEnabled}" />
+            </form>
+        </div>
+
+        <div class="cc-toggle-bar">
+            <div class="cc-toggle-info">
+                <div class="cc-toggle-title">
+                    <i class="fas fa-copy"></i>
+                    Mail CC
+                </div>
+                <div class="cc-toggle-hint">
+                    ON = send with CC (vikas.songara@localmail.com, vishal@localmail.com, imran.s@localmail.com).
+                    OFF = send To only (no CC).
+                </div>
+            </div>
+            <form th:action="@{/mail/cc-toggle}" method="post" class="cc-toggle-form" id="ccToggleForm">
+                <span class="cc-status" th:classappend="${ccEnabled} ? 'on' : 'off'"
+                      th:text="${ccEnabled} ? 'ON' : 'OFF'">ON</span>
+                <label class="toggle-switch" title="Toggle Mail CC">
+                    <input type="checkbox"
+                           id="ccEnabledToggle"
+                           th:checked="${ccEnabled}"
+                           onchange="submitCcToggle(this)" />
+                    <span class="toggle-slider"></span>
+                </label>
+                <input type="hidden" name="enabled" id="ccEnabledValue" th:value="${ccEnabled}" />
+            </form>
+        </div>
+
+        <div class="cc-toggle-bar">
+            <div class="cc-toggle-info">
+                <div class="cc-toggle-title">
+                    <i class="fas fa-clipboard-list"></i>
+                    Audit Entry
+                </div>
+                <div class="cc-toggle-hint">
+                    ON = insert audit records into AuditEntity. OFF = do not insert audit records.
+                </div>
+            </div>
+            <form th:action="@{/mail/audit-toggle}" method="post" class="cc-toggle-form" id="auditEntryToggleForm">
+                <span class="cc-status" th:classappend="${auditEntryEnabled} ? 'on' : 'off'"
+                      th:text="${auditEntryEnabled} ? 'ON' : 'OFF'">ON</span>
+                <label class="toggle-switch" title="Toggle Audit Entry">
+                    <input type="checkbox"
+                           id="auditEntryEnabledToggle"
+                           th:checked="${auditEntryEnabled}"
+                           onchange="submitAuditEntryToggle(this)" />
+                    <span class="toggle-slider"></span>
+                </label>
+                <input type="hidden" name="enabled" id="auditEntryEnabledValue" th:value="${auditEntryEnabled}" />
+            </form>
+        </div>
+    </div>
+    </div>
     <form th:action="@{/mail/report}" method="get" class="filter-strip">
         <div class="field">
             <label>Template Code</label>
@@ -171,5 +324,19 @@
         </div>
     </div>
 </div>
+<script>
+    function submitCcToggle(checkbox) {
+        document.getElementById('ccEnabledValue').value = checkbox.checked ? 'true' : 'false';
+        document.getElementById('ccToggleForm').submit();
+    }
+    function submitMailSendToggle(checkbox) {
+        document.getElementById('mailSendEnabledValue').value = checkbox.checked ? 'true' : 'false';
+        document.getElementById('mailSendToggleForm').submit();
+    }
+    function submitAuditEntryToggle(checkbox) {
+        document.getElementById('auditEntryEnabledValue').value = checkbox.checked ? 'true' : 'false';
+        document.getElementById('auditEntryToggleForm').submit();
+    }
+</script>
 </body>
 </html>

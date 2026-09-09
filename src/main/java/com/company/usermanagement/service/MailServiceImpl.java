@@ -33,6 +33,7 @@ public class MailServiceImpl implements MailService {
 	private final MailLogRepository mailLogRepository;
 	private final MailConfig mailConfig;
 	private final ChangeDetectionService changeDetectionService;
+	private final MailSettingService mailSettingService;
 
 	@Override
 	public void sendUserRegistrationEmail(UserEntity user) {
@@ -126,6 +127,11 @@ public class MailServiceImpl implements MailService {
 	}
 
 	private void sendTemplateEmail(String templateCode, String toEmail, Map<String, Object> variables) {
+		if (!mailSettingService.isMailSendEnabled()) {
+			log.info("Mail Send is OFF - skipping email for template {} to {}", templateCode, toEmail);
+			return;
+		}
+
 		if (!StringUtils.hasText(toEmail)) {
 			log.warn("Skipping email for template {} - recipient email is empty", templateCode);
 			return;

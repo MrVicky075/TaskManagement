@@ -24,6 +24,7 @@ public class MailSenderService {
 
 	private final JavaMailSender mailSender;
 	private final MailConfig mailConfig;
+	private final MailSettingService mailSettingService;
 
 	public void sendHtmlEmail(String toEmail, String subject, String htmlBody) {
 		sendHtmlEmail(toEmail, resolveConfiguredCc(), subject, htmlBody);
@@ -55,9 +56,14 @@ public class MailSenderService {
 	}
 
 	/**
-	 * Returns configured CC as a single comma-separated string (for logging / mail_log).
+	 * Returns configured CC emails when CC toggle is ON.
+	 * Returns null when CC toggle is OFF (To-only mail).
 	 */
 	public String resolveConfiguredCc() {
+		if (!mailSettingService.isCcEnabled()) {
+			log.info("Mail CC is OFF - sending without CC");
+			return null;
+		}
 		if (mailConfig.getNotification() == null) {
 			return null;
 		}
@@ -65,10 +71,6 @@ public class MailSenderService {
 		return StringUtils.hasText(cc) ? cc.trim() : null;
 	}
 
-	/**
-	 * Splits comma-separated CC emails, trims blanks, de-duplicates,
-	 * and skips any address that matches the To recipient.
-	 */
 	private String[] parseCcEmails(String ccEmail, String toEmail) {
 		if (!StringUtils.hasText(ccEmail)) {
 			return new String[0];

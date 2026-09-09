@@ -1,0 +1,477 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org.TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>Task Management - How To Work (Detailed)</title>
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Print</w:View>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.4; }
+  h1 { font-size: 18pt; color: #0b1a33; border-bottom: 2px solid #4a7fe0; padding-bottom: 6px; }
+  h2 { font-size: 14pt; color: #1a2c4a; margin-top: 22px; page-break-after: avoid; }
+  h3 { font-size: 12pt; color: #2a436e; margin-top: 14px; }
+  h4 { font-size: 11pt; color: #38507a; margin-top: 10px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; }
+  th, td { border: 1px solid #c5d0e0; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f0f5ff; }
+  ul, ol { margin: 6px 0 10px 20px; }
+  .meta { color: #5e6f8d; font-size: 10pt; }
+  .box { background: #f8faff; border: 1px solid #e9edf4; padding: 10px 12px; margin: 8px 0 12px; }
+  .step { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 8px 10px; margin: 8px 0; }
+  code { font-family: Consolas, monospace; background: #f3f4f6; padding: 1px 4px; }
+  .toc a { color: #1d5f9e; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<h1>Task Management System — How To Work (Detailed)</h1>
+<p class="meta">Project: TaskManagement &nbsp;|&nbsp; Base URL: http://localhost:6065 &nbsp;|&nbsp; Document Type: Full Working Guide with All Entries</p>
+
+<div class="box toc">
+<strong>Contents</strong>
+<ol>
+  <li>Project Introduction &amp; Tech Stack</li>
+  <li>Roles &amp; Permissions</li>
+  <li>Login Process (How Login Works)</li>
+  <li>Session Management</li>
+  <li>Logout Process</li>
+  <li>Dashboard Working</li>
+  <li>User Management (All Entries)</li>
+  <li>Task Management (All Entries)</li>
+  <li>Deleted Tasks &amp; Rollback</li>
+  <li>Excel Upload / Export</li>
+  <li>Audit Report &amp; Audit Entry Switch</li>
+  <li>Email System — When / How Mail is Sent</li>
+  <li>Email Audit Report &amp; Mail Switches</li>
+  <li>Configuration Reference</li>
+  <li>Database Tables</li>
+  <li>End-to-End Operator Checklist</li>
+</ol>
+</div>
+
+<!-- ===================== 1 ===================== -->
+<h2>1. Project Introduction &amp; Tech Stack</h2>
+<p>This application manages internal support/development tasks (tickets) for eProcurement. Users can create and update tasks, filter them on dashboard, manage users, import/export Excel, track audits, and receive email notifications.</p>
+<table>
+  <tr><th>Item</th><th>Detail</th></tr>
+  <tr><td>Language</td><td>Java 17</td></tr>
+  <tr><td>Framework</td><td>Spring Boot (Web, Security, Data JPA, Mail, Thymeleaf)</td></tr>
+  <tr><td>UI</td><td>Thymeleaf HTML templates</td></tr>
+  <tr><td>Database</td><td>Microsoft SQL Server</td></tr>
+  <tr><td>Excel</td><td>Apache POI</td></tr>
+  <tr><td>Port</td><td>6065</td></tr>
+  <tr><td>Schema update</td><td>spring.jpa.hibernate.ddl-auto=update</td></tr>
+</table>
+
+<!-- ===================== 2 ===================== -->
+<h2>2. Roles &amp; Permissions</h2>
+<p>Roles are stored on user entity as enum: <strong>ADMIN</strong>, <strong>SR_DEVELOPER</strong>, <strong>DEVELOPER</strong>, <strong>SUPPORT</strong>. Spring Security authority is <code>ROLE_&lt;ROLE&gt;</code>.</p>
+
+<h3>2.1 Menu Access</h3>
+<table>
+  <tr><th>Menu / Feature</th><th>ADMIN</th><th>SR_DEVELOPER</th><th>SUPPORT</th><th>DEVELOPER</th></tr>
+  <tr><td>Dashboard / My Task / Add / Manage Task</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+  <tr><td>Manage Users</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Audit Report</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Email Audit Report</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Deleted Task + Rollback</td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+  <tr><td>Export Excel</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes*</td></tr>
+  <tr><td>Delete button on Dashboard UI</td><td>Yes</td><td>Yes</td><td>No (hidden)</td><td>No</td></tr>
+</table>
+<p class="meta">*Export endpoint is authenticated for any logged-in user; admin sidebar shows Export for admin roles.</p>
+
+<h3>2.2 Task Edit Permission</h3>
+<ul>
+  <li><strong>ADMIN / SR_DEVELOPER / SUPPORT:</strong> can edit any task</li>
+  <li><strong>DEVELOPER:</strong> can edit only tasks assigned to self, or unassigned tasks</li>
+</ul>
+
+<!-- ===================== 3 ===================== -->
+<h2>3. Login Process (How Login Works)</h2>
+<div class="step"><strong>Entry URL:</strong> GET <code>/login</code> → page <code>auth/login.html</code></div>
+
+<h3>3.1 Step-by-step</h3>
+<ol>
+  <li>User opens login page and enters <strong>Email</strong> and <strong>Password</strong>.</li>
+  <li>Form posts to Spring Security URL <code>/login</code> with parameters:
+    <ul>
+      <li><code>email</code> (username parameter)</li>
+      <li><code>password</code></li>
+    </ul>
+  </li>
+  <li><strong>CustomUserDetailsService</strong> loads user from table <code>Tbl_UserLogin</code> by email.</li>
+  <li>If user not found → login failure → redirect <code>/login?error=true</code>.</li>
+  <li>If user <code>isActive = false</code> → account disabled → login fails.</li>
+  <li>Password is verified using <strong>BCrypt (strength 12)</strong>.</li>
+  <li>On success:
+    <ul>
+      <li><strong>AuthenticationSuccessListener</strong> runs</li>
+      <li>Fills session bean <strong>UserLoginSession</strong> with: userId, userName, email, mobileNo, role, isActive</li>
+      <li>Writes LOGIN audit (if Audit Entry is ON), with 5-second duplicate protection</li>
+      <li>Redirects to <code>/dashboard</code></li>
+    </ul>
+  </li>
+</ol>
+
+<h3>3.2 Classes Involved</h3>
+<table>
+  <tr><th>Class</th><th>Responsibility</th></tr>
+  <tr><td>AuthController</td><td>Shows login page</td></tr>
+  <tr><td>SecurityConfig</td><td>Form login config, success/failure URLs</td></tr>
+  <tr><td>CustomUserDetailsService</td><td>Load user by email</td></tr>
+  <tr><td>CustomUserDetails</td><td>Spring Security principal</td></tr>
+  <tr><td>AuthenticationSuccessListener</td><td>Session fill + login audit</td></tr>
+  <tr><td>UserLoginSession</td><td>Session-scoped logged-in user data</td></tr>
+</table>
+
+<!-- ===================== 4 ===================== -->
+<h2>4. Session Management</h2>
+<p>After login, application keeps user data in HTTP session and in session-scoped <code>UserLoginSession</code>.</p>
+
+<table>
+  <tr><th>Setting</th><th>Value</th><th>Meaning</th></tr>
+  <tr><td>server.servlet.session.timeout</td><td>30m</td><td>Idle session expires after 30 minutes</td></tr>
+  <tr><td>Cookie HttpOnly</td><td>true</td><td>JS cannot read session cookie</td></tr>
+  <tr><td>Cookie Secure</td><td>false</td><td>Works on HTTP (local)</td></tr>
+  <tr><td>Session fixation</td><td>migrateSession()</td><td>New session id after login for security</td></tr>
+  <tr><td>maximumSessions</td><td>1</td><td>Only one active login per user</td></tr>
+  <tr><td>maxSessionsPreventsLogin</td><td>true</td><td>Second login is blocked until first session ends</td></tr>
+</table>
+
+<h3>4.1 What is stored in session</h3>
+<ul>
+  <li>Spring Security authentication principal</li>
+  <li><code>UserLoginSession</code>: userId, userName, email, mobile, role, isActive</li>
+</ul>
+<p>Controllers/services use <code>UserLoginSession</code> for createdBy/updatedBy, permissions, and My Task filtering.</p>
+
+<!-- ===================== 5 ===================== -->
+<h2>5. Logout Process</h2>
+<ol>
+  <li>User clicks Logout (POST <code>/logout</code>).</li>
+  <li><strong>AuditLogoutHandler</strong> runs:
+    <ul>
+      <li>If <strong>Audit Entry ON</strong> → insert LOGOUT row in <code>tbl_audit</code></li>
+      <li>If OFF → skip audit insert</li>
+    </ul>
+  </li>
+  <li>Session invalidated, authentication cleared, cookie <code>JSESSIONID</code> deleted.</li>
+  <li>Redirect to <code>/login?logout=true</code>.</li>
+</ol>
+
+<!-- ===================== 6 ===================== -->
+<h2>6. Dashboard Working</h2>
+<div class="step"><strong>Entry:</strong> GET <code>/dashboard</code></div>
+<p>Dashboard shows task tickets with filters and KPI cards.</p>
+
+<h3>6.1 Filter entries (query parameters)</h3>
+<table>
+  <tr><th>Filter</th><th>Param</th><th>Default</th></tr>
+  <tr><td>Client</td><td>client</td><td>all</td></tr>
+  <tr><td>Assigned To</td><td>assignedTo</td><td>all</td></tr>
+  <tr><td>Issue Type</td><td>issueType</td><td>all</td></tr>
+  <tr><td>Priority</td><td>priority</td><td>all</td></tr>
+  <tr><td>Status</td><td>status</td><td>all</td></tr>
+  <tr><td>Fixed On</td><td>fixedOn</td><td>all</td></tr>
+  <tr><td>Date From / To</td><td>dateFrom / dateTo</td><td>empty</td></tr>
+</table>
+
+<h3>6.2 Ticket actions</h3>
+<ul>
+  <li><strong>Edit:</strong> if user has edit permission for that task</li>
+  <li><strong>Delete:</strong> soft delete (isActive=false); UI shown for ADMIN / SR_DEVELOPER</li>
+</ul>
+
+<!-- ===================== 7 ===================== -->
+<h2>7. User Management (All Entries)</h2>
+<div class="step"><strong>Access:</strong> ADMIN / SR_DEVELOPER / SUPPORT &nbsp;|&nbsp; Base: <code>/users</code></div>
+
+<table>
+  <tr><th>Action</th><th>How to do</th><th>System effect</th></tr>
+  <tr>
+    <td>List users</td>
+    <td>Open Manage Users</td>
+    <td>Shows users from Tbl_UserLogin</td>
+  </tr>
+  <tr>
+    <td>Add user</td>
+    <td>Add form → Save (name, email, mobile, role, password)</td>
+    <td>Creates user (active=true, BCrypt password).<br/>
+        Sends <strong>USER_REGISTERED</strong> email (if Mail Send ON).<br/>
+        Writes CREATE audit (if Audit Entry ON).</td>
+  </tr>
+  <tr>
+    <td>Edit user</td>
+    <td>Edit → Update fields → Save</td>
+    <td>Updates user.<br/>
+        Sends <strong>USER_UPDATED</strong> email with changed fields HTML.<br/>
+        Writes UPDATE audit.</td>
+  </tr>
+  <tr>
+    <td>Change status</td>
+    <td>Toggle Active/Inactive</td>
+    <td>Flips isActive; STATUS_CHANGE audit</td>
+  </tr>
+  <tr>
+    <td>Delete user</td>
+    <td>Delete action</td>
+    <td>Hard delete user; DELETE audit</td>
+  </tr>
+  <tr>
+    <td>Change password</td>
+    <td>From profile / admin flow <code>/dashboard/change-password/{id}</code></td>
+    <td>Updates password hash; redirects to login; UPDATE audit</td>
+  </tr>
+</table>
+
+<p><strong>Role options on create form:</strong> Developer, Sr. Developer, Support Team (ADMIN is seeded separately).</p>
+
+<!-- ===================== 8 ===================== -->
+<h2>8. Task Management (All Entries)</h2>
+
+<h3>8.1 Screens / URLs</h3>
+<table>
+  <tr><th>Screen</th><th>URL</th><th>Purpose</th></tr>
+  <tr><td>Manage Task</td><td>/tasks</td><td>All active tasks table</td></tr>
+  <tr><td>My Task</td><td>/tasks/myTask</td><td>Tasks assigned to logged-in user</td></tr>
+  <tr><td>Add Task</td><td>/tasks/taskForm</td><td>Create form</td></tr>
+  <tr><td>Edit Task</td><td>/tasks/editTask/{id}</td><td>Edit form (permission checked)</td></tr>
+  <tr><td>Save</td><td>POST /tasks/saveTask</td><td>Create or update</td></tr>
+  <tr><td>Delete</td><td>DELETE /tasks/deleteTask/{id}</td><td>Soft delete</td></tr>
+</table>
+
+<h3>8.2 Field entries on Add/Edit Task</h3>
+<table>
+  <tr><th>Field</th><th>Entry values / notes</th></tr>
+  <tr><td>Assigned To</td><td>Select active user</td></tr>
+  <tr><td>Priority</td><td>P1, P2, P3, P4, P5, P6, HOLD</td></tr>
+  <tr><td>Paid</td><td>Paid (default), UnPaid</td></tr>
+  <tr><td>Client Name</td><td>Required text</td></tr>
+  <tr><td>Issue</td><td>-, Bug, ISSUE, Requirement, Email, Change Request, Production Issue, Other</td></tr>
+  <tr><td>Redmine ID</td><td>Number (optional)</td></tr>
+  <tr><td>Days</td><td>Number</td></tr>
+  <tr><td>Requirement</td><td>Text/long text</td></tr>
+  <tr><td>Task Details</td><td>Text/long text</td></tr>
+  <tr><td>Status</td><td>-, New Task, Assigned, Working, Complete, Hold</td></tr>
+  <tr><td>Fixed On</td><td>-, LOCAL, UAT, PRODUCTION</td></tr>
+  <tr><td>Remarks</td><td>Optional text</td></tr>
+</table>
+
+<h3>8.3 Create Task flow</h3>
+<ol>
+  <li>Open Add Task → fill fields → Save.</li>
+  <li>System sets createdBy = logged-in user, isActive = true.</li>
+  <li>Audit CREATE inserted (if Audit Entry ON).</li>
+  <li>Email <strong>TASK_CREATED</strong> sent to assigned user email (if Mail Send ON and assignee email exists).</li>
+  <li>CC added from configured CC list if Mail CC ON.</li>
+</ol>
+
+<h3>8.4 Update Task flow</h3>
+<ol>
+  <li>Open Edit (only if permitted).</li>
+  <li>Save changes.</li>
+  <li>System compares old vs new fields.</li>
+  <li>If real changes exist → audit UPDATE/STATUS_CHANGE + email <strong>TASK_UPDATED</strong> with change summary.</li>
+  <li>If no field changes → email skipped.</li>
+</ol>
+
+<h3>8.5 Delete Task flow (soft delete)</h3>
+<ol>
+  <li>Delete action sets <code>isActive = false</code> (row remains in DB).</li>
+  <li>Audit DELETE written.</li>
+  <li>Email <strong>TASK_DELETED</strong> sent to assignee (subject to Mail Send switch).</li>
+  <li>Task disappears from active lists/dashboard.</li>
+</ol>
+
+<!-- ===================== 9 ===================== -->
+<h2>9. Deleted Tasks &amp; Rollback</h2>
+<div class="step"><strong>Entry:</strong> Dashboard → <strong>Deleted Task</strong> → <code>/tasks/deleted</code></div>
+<ol>
+  <li>Page lists all tasks where <code>isActive = false</code>.</li>
+  <li>Each row has Action button <strong>Rollback</strong>.</li>
+  <li>Rollback (POST <code>/tasks/rollback/{id}</code>):
+    <ul>
+      <li>Sets <code>isActive = true</code></li>
+      <li>Updates updatedBy</li>
+      <li>Writes UPDATE audit: “Restored deleted task #id”</li>
+      <li>Task becomes visible again in Manage Task / Dashboard</li>
+    </ul>
+  </li>
+</ol>
+
+<!-- ===================== 10 ===================== -->
+<h2>10. Excel Upload / Export</h2>
+
+<h3>10.1 Export</h3>
+<ul>
+  <li>URL: <code>/excel/export-tasks</code></li>
+  <li>Downloads all active tasks as Excel file</li>
+</ul>
+
+<h3>10.2 Upload (bulk create)</h3>
+<ul>
+  <li>Upload page: <code>/dashboard/excelUploadPage</code></li>
+  <li>API: POST <code>/excel/upload-excel</code></li>
+  <li><strong>Required columns:</strong> Client Name, Requirement</li>
+  <li>Other columns: Assigned, Priority, Issue, Redmine ID, Days, Task Details, Status, Fixed On, Remarks</li>
+  <li>If Assigned user missing/invalid → default user id 2 is used</li>
+  <li>Creates multiple tasks + BULK_CREATE audit</li>
+</ul>
+
+<h3>10.3 Template download</h3>
+<ul>
+  <li><code>/excel/download-template</code> → sample Excel template</li>
+</ul>
+
+<!-- ===================== 11 ===================== -->
+<h2>11. Audit Report &amp; Audit Entry Switch</h2>
+<div class="step"><strong>Entry:</strong> <code>/audit/report</code> (admin roles)</div>
+
+<h3>11.1 What gets logged (when Audit Entry = ON)</h3>
+<table>
+  <tr><th>Action</th><th>When</th></tr>
+  <tr><td>LOGIN</td><td>Successful login</td></tr>
+  <tr><td>LOGOUT</td><td>Logout</td></tr>
+  <tr><td>CREATE</td><td>User/Task create</td></tr>
+  <tr><td>UPDATE</td><td>User/Task update, password change, task restore</td></tr>
+  <tr><td>DELETE</td><td>User hard delete / Task soft delete</td></tr>
+  <tr><td>STATUS_CHANGE</td><td>User active toggle / task status-only change</td></tr>
+  <tr><td>BULK_CREATE</td><td>Excel task import</td></tr>
+</table>
+
+<h3>11.2 Audit record fields</h3>
+<p>auditId, userId, userName, action, entityType (USER/TASK/SYSTEM), entityId, description, oldValue (JSON), newValue (JSON), ipAddress, createdAt</p>
+
+<h3>11.3 Filters</h3>
+<p>Username, Action, Entity Type, Description, IP, Date From, Date To + pagination.</p>
+
+<h3>11.4 Audit Entry ON/OFF</h3>
+<ul>
+  <li>Stored in <code>tbl_mail_setting.audit_entry_enabled</code></li>
+  <li>Toggle on Email Audit Report page</li>
+  <li><strong>ON:</strong> insert into AuditEntity / tbl_audit</li>
+  <li><strong>OFF:</strong> skip all audit inserts (login/logout included)</li>
+</ul>
+
+<!-- ===================== 12 ===================== -->
+<h2>12. Email System — When / How Mail is Sent</h2>
+
+<h3>12.1 Configuration entries</h3>
+<table>
+  <tr><th>Property</th><th>Purpose</th></tr>
+  <tr><td>mail.from</td><td>From address</td></tr>
+  <tr><td>mail.host / mail.port</td><td>SMTP host/port</td></tr>
+  <tr><td>mail.notification.cc</td><td>Comma-separated CC emails</td></tr>
+  <tr><td>spring.mail.host / port</td><td>Spring JavaMail SMTP</td></tr>
+</table>
+<p><strong>Current CC example:</strong> vikas.songara@localmail.com, vishal@localmail.com, imran.s@localmail.com</p>
+
+<h3>12.2 Mail templates (DB)</h3>
+<table>
+  <tr><th>Template Code</th><th>Triggered by process</th><th>Recipient (To)</th></tr>
+  <tr><td>USER_REGISTERED</td><td>Create user</td><td>New user email</td></tr>
+  <tr><td>USER_UPDATED</td><td>Update user</td><td>Updated user email</td></tr>
+  <tr><td>TASK_CREATED</td><td>Create task</td><td>Assigned user email</td></tr>
+  <tr><td>TASK_UPDATED</td><td>Update task (only if fields changed)</td><td>Assigned user email</td></tr>
+  <tr><td>TASK_DELETED</td><td>Soft delete task</td><td>Assigned user email</td></tr>
+</table>
+
+<h3>12.3 Mail send pipeline (every notification)</h3>
+<ol>
+  <li>Business service calls MailService method (e.g. sendTaskCreatedEmail).</li>
+  <li><strong>Mail Send check:</strong> if OFF → stop (no SMTP, no forced failure to user flow depending on caller handling).</li>
+  <li>Resolve active template by template code.</li>
+  <li>Fill subject/body placeholders (task/user variables, change HTML where used).</li>
+  <li><strong>Mail CC check:</strong>
+    <ul>
+      <li>ON → attach configured CC list</li>
+      <li>OFF → To only</li>
+    </ul>
+  </li>
+  <li>Send via SMTP (<code>MailSenderService</code>).</li>
+  <li>Write row to <code>tbl_mail_log</code> with status SENT or FAILED (+ error message).</li>
+</ol>
+
+<div class="box">
+<strong>Important:</strong> Task create/update/delete emails require an assigned user with a valid email. If no assignee email, that notification is skipped with a warning in logs.
+</div>
+
+<h3>12.4 Process map — Email by business action</h3>
+<table>
+  <tr><th>Business action</th><th>Mail method</th><th>Template</th><th>CC behavior</th></tr>
+  <tr><td>Save new user</td><td>sendUserRegistrationEmail</td><td>USER_REGISTERED</td><td>As per Mail CC switch</td></tr>
+  <tr><td>Update user</td><td>sendUserUpdatedEmail</td><td>USER_UPDATED</td><td>As per Mail CC switch</td></tr>
+  <tr><td>Save new task</td><td>sendTaskCreatedEmail</td><td>TASK_CREATED</td><td>As per Mail CC switch</td></tr>
+  <tr><td>Update task (with changes)</td><td>sendTaskUpdatedEmail</td><td>TASK_UPDATED</td><td>As per Mail CC switch</td></tr>
+  <tr><td>Delete task</td><td>sendTaskDeletedEmail</td><td>TASK_DELETED</td><td>As per Mail CC switch</td></tr>
+</table>
+
+<!-- ===================== 13 ===================== -->
+<h2>13. Email Audit Report &amp; Mail Switches</h2>
+<div class="step"><strong>Entry:</strong> <code>/mail/report</code></div>
+
+<h3>13.1 Report columns (MailLog entity)</h3>
+<p>ID, Template Code, To Email, CC Email, From Email, Subject, Status (SENT/FAILED), Error Message, Created At, Sent At + Detail page</p>
+
+<h3>13.2 Filters</h3>
+<p>Template Code, To Email, Status, Date From, Date To</p>
+
+<h3>13.3 Switches (same page, stored in tbl_mail_setting)</h3>
+<table>
+  <tr><th>Switch</th><th>Column</th><th>ON</th><th>OFF</th></tr>
+  <tr><td>Mail Send</td><td>mail_send_enabled</td><td>Send notification emails</td><td>Do not send any mail</td></tr>
+  <tr><td>Mail CC</td><td>cc_enabled</td><td>Include CC list</td><td>To only (no CC)</td></tr>
+  <tr><td>Audit Entry</td><td>audit_entry_enabled</td><td>Insert audit rows</td><td>Do not insert audits</td></tr>
+</table>
+<p>Default for all switches if not set: <strong>ON</strong>.</p>
+
+<!-- ===================== 14 ===================== -->
+<h2>14. Configuration Reference</h2>
+<table>
+  <tr><th>Key</th><th>Example / note</th></tr>
+  <tr><td>server.port</td><td>6065</td></tr>
+  <tr><td>spring.datasource.url</td><td>SQL Server JDBC URL</td></tr>
+  <tr><td>server.servlet.session.timeout</td><td>30m</td></tr>
+  <tr><td>mail.from</td><td>supportabcprocure@localmail.com</td></tr>
+  <tr><td>mail.notification.cc</td><td>comma-separated CC emails</td></tr>
+  <tr><td>spring.mail.host / port</td><td>SMTP server</td></tr>
+</table>
+
+<!-- ===================== 15 ===================== -->
+<h2>15. Database Tables</h2>
+<table>
+  <tr><th>Table</th><th>Entity</th><th>Purpose</th></tr>
+  <tr><td>Tbl_UserLogin</td><td>UserEntity</td><td>Users, roles, passwords, active flag</td></tr>
+  <tr><td>tbl_tasks</td><td>TaskEntity</td><td>Tasks; soft delete via isActive</td></tr>
+  <tr><td>tbl_audit</td><td>AuditEntity</td><td>Audit trail</td></tr>
+  <tr><td>tbl_mail_log</td><td>MailLog</td><td>Email send history</td></tr>
+  <tr><td>tbl_mail_template</td><td>MailTemplate</td><td>Email HTML templates</td></tr>
+  <tr><td>tbl_mail_setting</td><td>MailSetting</td><td>Mail Send / CC / Audit Entry toggles (singleton id=1)</td></tr>
+</table>
+
+<!-- ===================== 16 ===================== -->
+<h2>16. End-to-End Operator Checklist</h2>
+<ol>
+  <li>Start application on port 6065.</li>
+  <li>Login with active user email/password.</li>
+  <li>Open Dashboard → verify tickets load.</li>
+  <li>Create a task with assignee → check assignee inbox + CC (if Mail Send/CC ON).</li>
+  <li>Edit task fields → check TASK_UPDATED email and audit.</li>
+  <li>Delete task → verify it moves to Deleted Task list.</li>
+  <li>Rollback deleted task → verify it returns to active lists.</li>
+  <li>Open Email Audit Report → confirm SENT/FAILED logs.</li>
+  <li>Toggle Mail Send OFF → perform action → confirm no new mail.</li>
+  <li>Toggle Audit Entry OFF → perform action → confirm no new audit row.</li>
+  <li>Logout → session cleared; login again.</li>
+</ol>
+
+<p class="meta">End of Detailed How-To-Work Guide — Companion short document: <strong>TaskManagement_Short_Guide.doc</strong></p>
+
+</body>
+</html>

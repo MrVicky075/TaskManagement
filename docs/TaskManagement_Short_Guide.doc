@@ -1,0 +1,154 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org.TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<title>Task Management - Short Guide</title>
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Print</w:View>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.35; }
+  h1 { font-size: 18pt; color: #0b1a33; border-bottom: 2px solid #4a7fe0; padding-bottom: 6px; }
+  h2 { font-size: 13pt; color: #1a2c4a; margin-top: 18px; }
+  h3 { font-size: 11.5pt; color: #2a436e; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; }
+  th, td { border: 1px solid #c5d0e0; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #f0f5ff; }
+  ul { margin: 6px 0 10px 18px; }
+  .meta { color: #5e6f8d; font-size: 10pt; }
+  .box { background: #f8faff; border: 1px solid #e9edf4; padding: 8px 10px; margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<h1>Task Management System — Short Guide</h1>
+<p class="meta">Project: TaskManagement &nbsp;|&nbsp; Port: 6065 &nbsp;|&nbsp; Document Type: Quick Reference (Short Details)</p>
+
+<h2>1. Project Overview</h2>
+<div class="box">
+Internal web app for eProcurement task/ticket tracking: users, tasks, dashboard, Excel import/export, audit trail, and email notifications.<br/>
+<strong>Tech:</strong> Java 17, Spring Boot, Spring Security, JPA, Thymeleaf, SQL Server, Apache POI, JavaMail.
+</div>
+
+<h2>2. How to Start</h2>
+<ul>
+  <li>Run Spring Boot app (server port <strong>6065</strong>)</li>
+  <li>Open <strong>http://localhost:6065/login</strong></li>
+  <li>Default seed admin (if used): <strong>admin@localmail.com</strong> / <strong>123</strong></li>
+</ul>
+
+<h2>3. User Roles (Short)</h2>
+<table>
+  <tr><th>Role</th><th>Access (short)</th></tr>
+  <tr><td>ADMIN</td><td>Full access: users, tasks, delete, audit, mail reports, deleted tasks, Excel export</td></tr>
+  <tr><td>SR_DEVELOPER</td><td>Same admin features as ADMIN for ops (users/audit/mail/deleted/export/delete)</td></tr>
+  <tr><td>SUPPORT</td><td>Admin menus (users/audit/mail/deleted); can edit all tasks; delete via API allowed</td></tr>
+  <tr><td>DEVELOPER</td><td>Dashboard, My Task, Add/Manage Task; edit own/unassigned only; no admin menus</td></tr>
+</table>
+
+<h2>4. Login & Session (Short)</h2>
+<ul>
+  <li><strong>Login:</strong> email + password → Spring Security → load user → fill session → go Dashboard</li>
+  <li><strong>Session:</strong> 30 minutes timeout; max 1 session per user</li>
+  <li><strong>Logout:</strong> clears session, writes logout audit (if Audit Entry ON)</li>
+</ul>
+
+<h2>5. Main Modules (Short)</h2>
+
+<h3>5.1 Dashboard</h3>
+<ul>
+  <li>Shows filtered task tickets (client, assignee, priority, status, dates, etc.)</li>
+  <li>KPI cards for status counts</li>
+  <li>Edit / Delete actions based on role</li>
+</ul>
+
+<h3>5.2 Task Management</h3>
+<ul>
+  <li><strong>Add / Edit / Manage / My Task</strong></li>
+  <li>Soft delete = <code>isActive = 0</code></li>
+  <li><strong>Deleted Task</strong> page lists inactive tasks; <strong>Rollback</strong> sets <code>isActive = 1</code></li>
+  <li>Key fields: Assigned To, Priority, Paid, Client, Redmine ID, Issue, Requirement, Task Details, Remarks, Status, Fixed On, Days</li>
+</ul>
+
+<h3>5.3 User Management</h3>
+<ul>
+  <li>Create / Edit / Delete users; toggle Active; Change Password</li>
+  <li>Roles assignable: Developer, Sr. Developer, Support</li>
+</ul>
+
+<h3>5.4 Excel</h3>
+<ul>
+  <li>Upload Excel to create tasks in bulk</li>
+  <li>Export active tasks to Excel</li>
+  <li>Download template available</li>
+</ul>
+
+<h3>5.5 Audit Report</h3>
+<ul>
+  <li>Shows LOGIN/LOGOUT/CREATE/UPDATE/DELETE and related actions</li>
+  <li>Filters: Username, Action, Entity, Description, IP, Date range</li>
+  <li>Controlled by <strong>Audit Entry ON/OFF</strong></li>
+</ul>
+
+<h3>5.6 Email Audit Report</h3>
+<ul>
+  <li>Shows all mail logs (to, cc, subject, status, error, times)</li>
+  <li>Toggles: <strong>Mail Send</strong>, <strong>Mail CC</strong>, <strong>Audit Entry</strong></li>
+</ul>
+
+<h2>6. Email Notifications (Short)</h2>
+<table>
+  <tr><th>Event</th><th>Template</th><th>To</th></tr>
+  <tr><td>User created</td><td>USER_REGISTERED</td><td>New user email</td></tr>
+  <tr><td>User updated</td><td>USER_UPDATED</td><td>User email</td></tr>
+  <tr><td>Task created</td><td>TASK_CREATED</td><td>Assigned user</td></tr>
+  <tr><td>Task updated (changes)</td><td>TASK_UPDATED</td><td>Assigned user</td></tr>
+  <tr><td>Task deleted</td><td>TASK_DELETED</td><td>Assigned user</td></tr>
+</table>
+<p><strong>CC:</strong> from <code>mail.notification.cc</code> when Mail CC is ON.<br/>
+<strong>Mail Send OFF:</strong> no email is sent.<br/>
+<strong>Mail CC OFF:</strong> email goes To only (no CC).</p>
+
+<h2>7. Important URLs (Short)</h2>
+<table>
+  <tr><th>URL</th><th>Purpose</th></tr>
+  <tr><td>/login</td><td>Login page</td></tr>
+  <tr><td>/dashboard</td><td>Home / tickets</td></tr>
+  <tr><td>/tasks</td><td>Manage tasks</td></tr>
+  <tr><td>/tasks/myTask</td><td>My tasks</td></tr>
+  <tr><td>/tasks/taskForm</td><td>Add task</td></tr>
+  <tr><td>/tasks/deleted</td><td>Deleted tasks + Rollback</td></tr>
+  <tr><td>/users</td><td>Manage users</td></tr>
+  <tr><td>/audit/report</td><td>Audit Report</td></tr>
+  <tr><td>/mail/report</td><td>Email Audit Report + toggles</td></tr>
+  <tr><td>/excel/export-tasks</td><td>Export Excel</td></tr>
+</table>
+
+<h2>8. Main Database Tables (Short)</h2>
+<table>
+  <tr><th>Table</th><th>Stores</th></tr>
+  <tr><td>Tbl_UserLogin</td><td>Users / roles / passwords</td></tr>
+  <tr><td>tbl_tasks</td><td>Tasks (soft delete via isActive)</td></tr>
+  <tr><td>tbl_audit</td><td>Audit entries</td></tr>
+  <tr><td>tbl_mail_log</td><td>Email send history</td></tr>
+  <tr><td>tbl_mail_template</td><td>Email templates</td></tr>
+  <tr><td>tbl_mail_setting</td><td>Mail Send / Mail CC / Audit Entry switches</td></tr>
+</table>
+
+<h2>9. Runtime Switches (Short)</h2>
+<table>
+  <tr><th>Switch</th><th>ON</th><th>OFF</th></tr>
+  <tr><td>Mail Send</td><td>Send emails</td><td>Do not send emails</td></tr>
+  <tr><td>Mail CC</td><td>Add CC recipients</td><td>To only</td></tr>
+  <tr><td>Audit Entry</td><td>Insert audit rows</td><td>Skip audit inserts</td></tr>
+</table>
+
+<p class="meta">End of Short Guide — See companion document: <strong>TaskManagement_HowToWork_Detailed.doc</strong> for full process descriptions.</p>
+
+</body>
+</html>
