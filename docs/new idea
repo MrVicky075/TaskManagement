@@ -1,0 +1,15 @@
+Dashboard side bar add 
+* Approval
+	- User Approval (show the count - pending approval)
+	- Task Approval (show the count - pending approval)
+	
+- if user delete in User : than show in 'User Approval'
+	- which changes , IP address, time, change by, User
+	- 2 button : Approved / Reject with remarks
+- if Edit Task : than show in 'Task Approval'
+	- show only Edit in (Assigned, Paid, Client Name, Days, Status, Fixed On) [not enclude - Priority, Issue, Redmine ID, Requirement, Task Details, Remarks]
+	- Task ID, redmine , Assigned, Requirement ,which changes(old value , new value) , IP address, time, change by, User, 
+	- 2 button : Approved / Reject with remarks
+	
+- Add Task page - show to information msg 'user only changes (Priority, Issue, Redmine ID, Requirement, Task Details, Remarks), other field change than take approval from Authorities'
+	
